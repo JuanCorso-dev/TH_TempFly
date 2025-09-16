@@ -1,0 +1,54 @@
+storage:
+  # type: SQLITE or MYSQL
+  type: SQLITE
+  sqlite:
+    file: data.db
+  mysql:
+    host: localhost
+    port: 3306
+    database: tempfly
+    username: root
+    password: password
+    params: "useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+  hikari:
+    poolName: TH-TempFly
+    maximumPoolSize: 10
+    minimumIdle: 2
+    connectionTimeoutMs: 10000
+
+# Redis Configuration (for server synchronization)
+redis:
+  # Enable/disable Redis completely (true/false)
+  # If false, the plugin will not attempt to connect to Redis
+  enabled: false
+  # Unique name for this server (change for each server)
+  server-name: "server1"
+  # Specify your Redis server credentials here
+  # Set "password" to '' if you don't have one
+  credentials:
+    host: "localhost"
+    port: 6379
+    password: ""
+    use_ssl: false
+  # Options for Redis sentinel usage. Don't modify this unless you know what you're doing!
+  sentinel:
+    # Master set name for Redis sentinel
+    master: ""
+    # List of host:port pairs
+    nodes: []
+    password: ""
+  # Data synchronization configuration
+  sync:
+    # Enable automatic fly time synchronization between servers
+    enabled: true
+    # Synchronization interval in seconds (minimum: 30)
+    interval: 60
+    # Communication channel for Redis
+    channel: "tempfly"
+
+fly:
+  tick-interval-ticks: 20
+  save-interval-seconds: 60
+  default-seconds: 0
+  disable-on-quit: true
+  enable-on-join-if-leftover: true

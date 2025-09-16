@@ -1,0 +1,84 @@
+# TH_TempFly - Plugin Messages
+# You can customize all messages here using Minecraft color codes (&)
+
+# Command messages
+commands:
+  no-permission: "&cYou don't have permission to use this command."
+  player-only: "&cThis command can only be used by players."
+  player-not-found: "&cPlayer not found: {player}"
+  specify-player: "&cPlease specify a player."
+  invalid-time: "&cInvalid time format. Use: 30s, 5m, 2h, 1d"
+  
+  # /tempfly command
+  tempfly:
+    usage: "&e/tempfly <give|add|remove|check|reload> [player] [time]"
+    time-formats: "&7Time formats: &e30s, 5m, 2h, 1d &7or just &e30 &7for seconds"
+    unknown-subcommand: "&cUnknown subcommand."
+    
+    # Subcommands
+    reload:
+      success: "&aConfiguration reloaded."
+    
+    check:
+      remaining: "&aRemaining fly time: &e{time}"
+      no-time: "&c{player} has no remaining fly time."
+    
+    give:
+      usage: "&cUsage: /tempfly give <player> <time>"
+      example: "&7Example: &e/tempfly give PlayerName 1h"
+      success: "&aFly time set to &e{time}"
+    
+    add:
+      usage: "&cUsage: /tempfly add <player> <time>"
+      example: "&7Example: &e/tempfly add PlayerName 30m"
+      success: "&aFly time updated by &e{change}"
+    
+    remove:
+      usage: "&cUsage: /tempfly remove <player> <time>"
+      example: "&7Example: &e/tempfly remove PlayerName 15m"
+      success: "&aFly time reduced by &e{change}"
+
+# /fly command
+fly:
+  no-permission: "&cYou don't have permission to use this command."
+  no-time: "&cYou have no remaining fly time."
+  contact-admin: "&7Contact an administrator to get fly time."
+  disabled: "&cFlight disabled."
+  enabled: "&aFlight enabled. Time remaining: &e{time}"
+  infinite-enabled: "&aInfinite flight enabled."
+
+# Event messages
+events:
+  join:
+    welcome-back: "&aWelcome back! You have &e{time} &aof fly time remaining."
+    infinite-fly: "&aWelcome! You have infinite flight."
+  
+  quit:
+    fly-disabled: "&cFlight disabled when leaving the server."
+  
+  time-expired: "&cYour fly time has expired!"
+
+# PlaceholderAPI messages
+placeholders:
+  no-time: "No time"
+  infinite: "Infinite"
+  flying: "Flying"
+  can-fly: "Can fly"
+  no-permission: "No permission"
+
+# Configuration messages
+config:
+  database:
+    initializing: "&7Initializing database..."
+    initialized: "&aDatabase initialized successfully"
+    error: "&cError initializing database: {error}"
+  
+  plugin:
+    starting: "&7Starting TH_TempFly plugin..."
+    config-loaded: "&aConfiguration loaded successfully"
+    commands-registered: "&aCommands registered successfully"
+    listeners-registered: "&aListeners registered successfully"
+    placeholderapi-registered: "&aPlaceholderAPI expansion registered successfully!"
+    placeholderapi-not-found: "&7PlaceholderAPI not found, placeholders will not be available."
+    enabled: "&aTH_TempFly plugin enabled successfully!"
+    disabled: "&cTH_TempFly plugin disabled."

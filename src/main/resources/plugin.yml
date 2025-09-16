@@ -1,0 +1,32 @@
+main: com.github.djkingcraftero89.TH_TempFly.TH_TempFly
+version: 1.1.1
+name: TH_TempFly
+authors: [JuanCorso]
+api-version: 1.20
+softdepend: ["PlaceholderAPI"]
+commands:
+  tempfly:
+    description: Manage temporary fly time for players
+    usage: "/tempfly <give|add|remove|check|reload> [player] [seconds]"
+    aliases: [tfly]
+    permission: thtempfly.use
+  fly:
+    description: Toggle flight mode for yourself
+    usage: "/fly"
+    permission: thtempfly.fly.use
+permissions:
+  thtempfly.use:
+    description: Allows using /tempfly base command
+    default: op
+  thtempfly.admin:
+    description: Allows managing other players' fly time and reload
+    default: op
+  thtempfly.fly:
+    description: Allows player to have temporary fly
+    default: true
+  thtempfly.fly.use:
+    description: Allows player to use /fly command to toggle flight
+    default: true
+  thtempfly.fly.infinite:
+    description: Allows player to have infinite fly time
+    default: op

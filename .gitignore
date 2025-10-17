@@ -39,3 +39,10 @@ cache/
 
 # Maven wrapper
 .mvn/wrapper/maven-wrapper.jar
+
+# Build artifacts
+*.jar
+*.zip
+
+# Maven directory
+apache-maven-*/

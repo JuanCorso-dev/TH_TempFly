@@ -16,22 +16,22 @@ public class RedisService {
 	private StatefulRedisConnection<String, String> connection;
 	private StatefulRedisPubSubConnection<String, String> pubSubConnection;
 
-	public RedisService(boolean enabled) {
-		this.enabled = enabled;
-		this.channel = null;
-	}
-
 	public RedisService(boolean enabled, String host, int port, String username, String password, int database, String clientName, String channel) {
 		this.enabled = enabled;
 		this.channel = channel;
 		if (!enabled) return;
-		RedisURI.Builder builder = RedisURI.builder().withHost(host).withPort(port).withDatabase(database);
-		if (username != null && !username.isEmpty()) builder.withAuthentication(username, password == null ? "" : password);
-		else if (password != null && !password.isEmpty()) builder.withPassword(password.toCharArray());
-		if (clientName != null && !clientName.isEmpty()) builder.withClientName(clientName);
-		RedisURI uri = builder.build();
-		this.client = RedisClient.create(uri);
-		this.connection = client.connect();
+		try {
+			RedisURI.Builder builder = RedisURI.builder().withHost(host).withPort(port).withDatabase(database);
+			if (username != null && !username.isEmpty()) builder.withAuthentication(username, password == null ? "" : password);
+			else if (password != null && !password.isEmpty()) builder.withPassword(password.toCharArray());
+			if (clientName != null && !clientName.isEmpty()) builder.withClientName(clientName);
+			RedisURI uri = builder.build();
+			this.client = RedisClient.create(uri);
+			this.connection = client.connect();
+		} catch (Throwable t) {
+			// Fallback: mark as disabled and cleanup any partial client
+			this.close();
+		}
 	}
 
 	public void subscribe(BiConsumer<String, String> handler) {

@@ -1,5 +1,5 @@
-# TH_TempFly - Plugin Messages
-# You can customize all messages here using Minecraft color codes (&)
+# TH_TempFly Plugin Messages
+# Customize all messages using Minecraft color codes with ampersand notation
 
 # Command messages
 commands:
@@ -51,12 +51,26 @@ fly:
 events:
   join:
     welcome-back: "&aWelcome back! You have &e{time} &aof fly time remaining."
+    welcome-back-frozen: "&aWelcome back! You have &e{time} &aof fly time remaining. &7(Time freezes when offline)"
     infinite-fly: "&aWelcome! You have infinite flight."
   
   quit:
     fly-disabled: "&cFlight disabled when leaving the server."
+    time-frozen: "&7Your fly time has been frozen and will resume when you return."
   
   time-expired: "&cYour fly time has expired!"
+  
+  # Time system messages
+  time-system:
+    frozen-mode: "&7Time freezes when you're offline - only counts down while playing!"
+    continuous-mode: "&7Time continues counting down even when you're offline!"
+  
+  # Title messages for fly time warnings
+  titles:
+    warning-title: "&c&lFly Time Warning!"
+    warning-subtitle: "&e{seconds} seconds remaining"
+    expired-title: "&4&lFly Time Expired!"
+    expired-subtitle: "&cYour flight has been disabled"
 
 # PlaceholderAPI messages
 placeholders:

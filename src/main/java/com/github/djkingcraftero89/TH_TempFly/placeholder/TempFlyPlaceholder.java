@@ -51,29 +51,29 @@ public class TempFlyPlaceholder extends PlaceholderExpansion {
 				}
 				return TimeParser.formatSeconds(remainingTime);
 			
-			case "time_seconds":
-			case "remaining_seconds":
-			case "left_seconds":
-				if (hasInfiniteFly) {
-					return "∞";
-				}
-				return String.valueOf(remainingTime);
-			
-			case "time_minutes":
-			case "remaining_minutes":
-			case "left_minutes":
-				if (hasInfiniteFly) {
-					return "∞";
-				}
-				return String.valueOf(remainingTime / 60);
-			
-			case "time_hours":
-			case "remaining_hours":
-			case "left_hours":
-				if (hasInfiniteFly) {
-					return "∞";
-				}
-				return String.valueOf(remainingTime / 3600);
+		case "time_seconds":
+		case "remaining_seconds":
+		case "left_seconds":
+			if (hasInfiniteFly) {
+				return "-1";
+			}
+			return String.valueOf(remainingTime);
+		
+		case "time_minutes":
+		case "remaining_minutes":
+		case "left_minutes":
+			if (hasInfiniteFly) {
+				return "-1";
+			}
+			return String.valueOf(remainingTime / 60);
+		
+		case "time_hours":
+		case "remaining_hours":
+		case "left_hours":
+			if (hasInfiniteFly) {
+				return "-1";
+			}
+			return String.valueOf(remainingTime / 3600);
 			
 			case "has_time":
 			case "can_fly":

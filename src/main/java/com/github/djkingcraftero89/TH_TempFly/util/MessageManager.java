@@ -3,6 +3,7 @@ package com.github.djkingcraftero89.TH_TempFly.util;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;
@@ -23,20 +24,17 @@ public class MessageManager {
     public void loadMessages() {
         File messagesFile = new File(plugin.getDataFolder(), "messages.yml");
         
-        // Si no existe el archivo, copiarlo desde resources
         if (!messagesFile.exists()) {
             plugin.saveResource("messages.yml", false);
         }
         
         messagesConfig = YamlConfiguration.loadConfiguration(messagesFile);
         messageCache.clear();
-        
-        // Precargar todos los mensajes en cache
         loadAllMessages();
     }
 
     private void loadAllMessages() {
-        // Cargar mensajes de comandos
+        // Load command messages
         loadCommandMessages();
         loadFlyMessages();
         loadEventMessages();
@@ -53,7 +51,7 @@ public class MessageManager {
             cacheMessage("commands." + key);
         }
         
-        // Mensajes específicos de tempfly
+        // TempFly specific messages
         String[] tempflyKeys = {
             "usage", "time-formats", "unknown-subcommand", "reload.success",
             "check.remaining", "check.no-time", "give.usage", "give.example", "give.success",
@@ -77,7 +75,10 @@ public class MessageManager {
 
     private void loadEventMessages() {
         String[] eventKeys = {
-            "join.welcome-back", "join.infinite-fly", "quit.fly-disabled", "time-expired"
+            "join.welcome-back", "join.welcome-back-frozen", "join.infinite-fly", 
+            "quit.fly-disabled", "quit.time-frozen", "time-expired",
+            "time-system.frozen-mode", "time-system.continuous-mode",
+            "titles.warning-title", "titles.warning-subtitle", "titles.expired-title", "titles.expired-subtitle"
         };
         
         for (String key : eventKeys) {
@@ -118,7 +119,7 @@ public class MessageManager {
     public String getMessage(String key) {
         String message = messageCache.get(key);
         if (message == null) {
-            message = messagesConfig.getString(key, "&cMensaje no encontrado: " + key);
+            message = messagesConfig.getString(key, "&cMessage not found: " + key);
             messageCache.put(key, message);
         }
         return ChatColor.translateAlternateColorCodes('&', message);
@@ -144,5 +145,53 @@ public class MessageManager {
 
     public void reload() {
         loadMessages();
+    }
+    
+    /**
+     * Send a title to a player
+     * @param player The player to send the title to
+     * @param titleKey The message key for the title
+     * @param subtitleKey The message key for the subtitle
+     * @param fadeIn Fade in time in ticks
+     * @param stay Stay time in ticks
+     * @param fadeOut Fade out time in ticks
+     */
+    public void sendTitle(Player player, String titleKey, String subtitleKey, int fadeIn, int stay, int fadeOut) {
+        String title = getMessage(titleKey);
+        String subtitle = getMessage(subtitleKey);
+        player.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
+    }
+    
+    /**
+     * Send a title to a player with placeholders
+     * @param player The player to send the title to
+     * @param titleKey The message key for the title
+     * @param subtitleKey The message key for the subtitle
+     * @param placeholders Map of placeholders to replace
+     * @param fadeIn Fade in time in ticks
+     * @param stay Stay time in ticks
+     * @param fadeOut Fade out time in ticks
+     */
+    public void sendTitle(Player player, String titleKey, String subtitleKey, Map<String, String> placeholders, int fadeIn, int stay, int fadeOut) {
+        String title = getMessage(titleKey, placeholders);
+        String subtitle = getMessage(subtitleKey, placeholders);
+        player.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
+    }
+    
+    /**
+     * Send a title to a player with a single placeholder
+     * @param player The player to send the title to
+     * @param titleKey The message key for the title
+     * @param subtitleKey The message key for the subtitle
+     * @param placeholder The placeholder key
+     * @param value The placeholder value
+     * @param fadeIn Fade in time in ticks
+     * @param stay Stay time in ticks
+     * @param fadeOut Fade out time in ticks
+     */
+    public void sendTitle(Player player, String titleKey, String subtitleKey, String placeholder, String value, int fadeIn, int stay, int fadeOut) {
+        Map<String, String> placeholders = new HashMap<>();
+        placeholders.put(placeholder, value);
+        sendTitle(player, titleKey, subtitleKey, placeholders, fadeIn, stay, fadeOut);
     }
 }

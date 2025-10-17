@@ -16,39 +16,45 @@ storage:
     minimumIdle: 2
     connectionTimeoutMs: 10000
 
-# Redis Configuration (for server synchronization)
+# Redis Configuration for multi-server synchronization
 redis:
-  # Enable/disable Redis completely (true/false)
-  # If false, the plugin will not attempt to connect to Redis
+  # Enable or disable Redis completely
   enabled: false
-  # Unique name for this server (change for each server)
+  # Unique name for this server in multi-server setup
   server-name: "server1"
-  # Specify your Redis server credentials here
-  # Set "password" to '' if you don't have one
+  # Redis server credentials
   credentials:
     host: "localhost"
     port: 6379
+    username: ""
     password: ""
-    use_ssl: false
-  # Options for Redis sentinel usage. Don't modify this unless you know what you're doing!
-  sentinel:
-    # Master set name for Redis sentinel
-    master: ""
-    # List of host:port pairs
-    nodes: []
-    password: ""
+    database: 0
   # Data synchronization configuration
   sync:
-    # Enable automatic fly time synchronization between servers
-    enabled: true
-    # Synchronization interval in seconds (minimum: 30)
-    interval: 60
-    # Communication channel for Redis
-    channel: "tempfly"
+    # Communication channel for Redis synchronization
+    channel: "TH-TempFly:updates"
+    # Log incoming sync messages (keep false in production to reduce spam)
+    log-received: false
+    # Periodic full broadcast of all player states (disabled by default to avoid spam)
+    full-broadcast-enabled: false
 
 fly:
+  # Tick interval for checking fly time in ticks (20 ticks = 1 second)
   tick-interval-ticks: 20
+  # Interval to save player data to database in seconds
   save-interval-seconds: 60
-  default-seconds: 0
+  # Disable flight when player quits the server
   disable-on-quit: true
+  # Automatically enable flight when player joins if they have remaining time
   enable-on-join-if-leftover: true
+  # Freeze fly time for offline players (only counts down while playing)
+  freeze-time-when-offline: true
+  
+  # Title system configuration
+  titles:
+    # Enable title warnings when fly time is running out
+    enabled: true
+    # Show title warning when remaining time is at or below this value in seconds
+    warning-threshold: 5
+    # Update interval for countdown titles in ticks (20 ticks = 1 second)
+    update-interval: 20

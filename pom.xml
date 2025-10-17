@@ -3,9 +3,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.djkingcraftero89</groupId>
   <artifactId>TH_TempFly</artifactId>
-  <version>1.1.1</version>
+  <version>1.1.0</version>
   <name>TH_TempFly</name>
-  <description>Temporary fly plugin with SQL and Redis support</description>
+  <description>Temporary fly plugin with SQL and Redis support for multi-server networks</description>
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
@@ -74,9 +74,37 @@
       <version>${placeholderapi.version}</version>
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.bstats</groupId>
+      <artifactId>bstats-bukkit</artifactId>
+      <version>3.0.2</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 
   <build>
+    <finalName>${project.artifactId}-${project.version}</finalName>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+        <includes>
+          <include>**/*.yml</include>
+          <include>**/*.yaml</include>
+          <include>**/*.properties</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>**/*.yml</exclude>
+          <exclude>**/*.yaml</exclude>
+          <exclude>**/*.properties</exclude>
+        </excludes>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -87,6 +115,19 @@
           <target>${maven.compiler.target}</target>
         </configuration>
       </plugin>
+      
+      <!-- Plugin to filter resources and replace placeholders -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.3.1</version>
+        <configuration>
+          <encoding>UTF-8</encoding>
+          <useDefaultDelimiters>true</useDefaultDelimiters>
+        </configuration>
+      </plugin>
+      
+      
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
@@ -107,6 +148,10 @@
                 <relocation>
                   <pattern>io.lettuce</pattern>
                   <shadedPattern>com.th.tempfly.libs.lettuce</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.bstats</pattern>
+                  <shadedPattern>com.github.djkingcraftero89.TH_TempFly.libs.bstats</shadedPattern>
                 </relocation>
               </relocations>
             </configuration>

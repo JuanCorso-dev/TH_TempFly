@@ -1,0 +1,209 @@
+
+DESCRIPTION
+
+TH_TempFly is a comprehensive and professional plugin that allows administrators to grant temporary flight time to players. Perfect for survival servers, skyblock, or any game mode where you want to reward your players with limited flight.
+
+Why choose TH_TempFly?
+
+- Flexible time system (seconds, minutes, hours, days)
+- Multi-server synchronization with Redis
+- Robust database support (SQLite and MySQL)
+- 100% customizable messages
+- PlaceholderAPI integration
+- Title warning system when time is running out
+- Time freeze mode for offline players
+
+
+
+MAIN FEATURES
+
+Temporary Flight System
+
+- Grant specific flight time to players
+- Flexible time formats: 30s, 5m, 2h, 1d
+- Time only counts down when player is actually flying
+- Option to freeze time when player is offline
+
+
+Infinite Flight Permission
+
+- Special permission for staff or VIP players
+- Unlimited flight without restrictions
+- Compatible with temporary flight system
+
+
+Database Support
+
+- SQLite for small servers (automatic setup)
+- MySQL for large networks with multiple servers
+- Optimized connection pooling with HikariCP
+- Automatic and periodic saving
+
+
+Redis Synchronization
+
+- Real-time synchronization between servers
+- Perfect for BungeeCord/Velocity networks
+- Flight time persists when switching servers
+- Simple and efficient configuration
+
+
+PlaceholderAPI Integration
+
+- Display remaining time in TAB, scoreboards, holograms
+- 7+ different placeholders available
+- Compatible with any plugin that uses PAPI
+
+
+Warning System
+
+- Title warnings when time is running low
+- Customizable visual countdown
+- Configurable alerts by remaining time
+
+
+Fully Customizable
+
+- All messages editable in messages.yml
+- Full color code support
+- Customizable prefixes and formats
+
+
+
+COMMANDS
+
+Admin Commands:
+/tempfly give <player> <time>   - Set player's flight time
+/tempfly add <player> <time>    - Add flight time to player
+/tempfly remove <player> <time> - Remove flight time from player
+/tempfly check <player>         - Check player's remaining time
+/tempfly reload                 - Reload plugin configuration
+/atempfly debug <true|false>    - Toggle debug mode
+
+
+Player Commands:
+/fly - Toggle flight mode
+
+
+Time Formats:
+- 30s or 30 = 30 seconds
+- 5m = 5 minutes
+- 2h = 2 hours
+- 1d = 1 day
+
+
+
+
+PERMISSIONS
+
+
+Permission                   | Description                            | Default
+thtempfly.use               | Use basic /tempfly commands            | op
+thtempfly.admin             | Manage other players' flight time      | op
+thtempfly.fly.use           | Use /fly command                       | true
+thtempfly.fly.infinite      | Infinite flight without restrictions   | op
+
+
+
+PLACEHOLDERS (PlaceholderAPI)
+
+
+%thtempfly_time%           - Formatted remaining time (e.g., "1h 30m" or "Infinite")
+%thtempfly_time_seconds%   - Time in seconds (e.g., "3600" or "-1")
+%thtempfly_time_minutes%   - Time in minutes (e.g., "90" or "-1")
+%thtempfly_time_hours%     - Time in hours (e.g., "2" or "-1")
+%thtempfly_has_time%       - Has flight time ("true" or "false")
+%thtempfly_can_fly%        - Can fly ("true" or "false")
+%thtempfly_status%         - Flight status ("flying", "can_fly", "no_time")
+
+
+
+CONFIGURATION
+
+Database (SQLite by default):
+
+storage:
+  type: SQLITE  # or MYSQL
+  sqlite:
+    file: data.db
+  mysql:
+    host: localhost
+    port: 3306
+    database: tempfly
+    username: root
+    password: password
+
+
+Redis (Optional for multi-server):
+
+redis:
+  enabled: false  # Change to true to activate
+  server-name: "server1"  # Unique name per server
+  credentials:
+    host: "localhost"
+    port: 6379
+    password: ""
+    database: 0
+
+
+Flight Options:
+
+fly:
+  tick-interval-ticks: 20  # How often to check (20 = 1 second)
+  save-interval-seconds: 60  # How often to save to database
+  disable-on-quit: true  # Disable flight on quit
+  enable-on-join-if-leftover: true  # Enable flight on join if has time
+  freeze-time-when-offline: true  # Freeze time when offline
+  
+  titles:
+    enabled: true  # Warning titles
+    warning-threshold: 5  # Show warning with X seconds remaining
+    update-interval: 20  # Update every X ticks
+
+
+
+INSTALLATION
+
+1. Download the TH_TempFly-1.1.0.jar file
+2. Place it in your server's plugins/ folder
+3. Restart the server
+4. Configure the plugin in plugins/TH_TempFly/config.yml
+5. Customize messages in plugins/TH_TempFly/messages.yml
+6. Done! Use /tempfly give <player> <time> to start
+
+
+REQUIREMENTS
+
+
+- Minecraft: 1.20 or higher
+- Java: 17 or higher
+- Server: Paper, Spigot, or Bukkit
+- Optional: PlaceholderAPI to use placeholders
+- Optional: Redis for multi-server synchronization
+
+
+
+USAGE EXAMPLES
+
+Reward a player with 1 hour of flight:
+/tempfly give Steve 1h
+
+Add 30 more minutes to a player:
+/tempfly add Alex 30m
+
+Remove 15 minutes of flight:
+/tempfly remove Steve 15m
+
+Check how much time a player has left:
+/tempfly check Alex
+
+Player activates their flight:
+/fly
+
+
+
+
+
+
+
+

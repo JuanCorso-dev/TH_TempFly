@@ -9,16 +9,21 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
-public class TempFlyCommand implements CommandExecutor {
+public class TempFlyCommand implements CommandExecutor, TabCompleter {
 	private final Plugin plugin;
 	private final FlyManager flyManager;
 	private final DataStore dataStore;
 	private final MessageManager messageManager;
+	private static boolean debugMode = false;
 
 	public TempFlyCommand(Plugin plugin, FlyManager flyManager, DataStore dataStore, MessageManager messageManager) {
 		this.plugin = plugin;
@@ -29,6 +34,26 @@ public class TempFlyCommand implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		String cmd = command.getName().toLowerCase();
+		// Admin command: /atempfly -> only "debug"
+		if ("atempfly".equals(cmd)) {
+			if (args.length == 0) {
+				sender.sendMessage("Usage: /atempfly debug <true|false>");
+				return true;
+			}
+			String sub = args[0].toLowerCase();
+			if ("debug".equals(sub)) {
+				if (!sender.hasPermission("thtempfly.admin")) {
+					sender.sendMessage(messageManager.getMessage("commands.no-permission"));
+					return true;
+				}
+				return handleDebug(sender, args);
+			}
+			sender.sendMessage("Invalid subcommand. Use: /atempfly debug <true|false>");
+			return true;
+		}
+
+		// Normal command: /tempfly (without "debug")
 		if (args.length == 0) {
 			sender.sendMessage(messageManager.getMessage("commands.tempfly.usage"));
 			sender.sendMessage(messageManager.getMessage("commands.tempfly.time-formats"));
@@ -131,5 +156,105 @@ public class TempFlyCommand implements CommandExecutor {
 		if (off != null && off.getUniqueId() != null) return off.getUniqueId();
 		sender.sendMessage(messageManager.getMessage("commands.player-not-found", "player", name));
 		return null;
+	}
+
+	private boolean handleDebug(CommandSender sender, String[] args) {
+		if (args.length < 2) {
+			String status = debugMode ? "enabled" : "disabled";
+			sender.sendMessage("Debug mode is currently " + status + ".");
+			sender.sendMessage("Usage: /atempfly debug <true|false>");
+			return true;
+		}
+		
+		String value = args[1].toLowerCase();
+		if ("true".equals(value) || "on".equals(value) || "1".equals(value)) {
+			debugMode = true;
+			sender.sendMessage("Debug mode enabled. Detailed logs will be shown in console.");
+		} else if ("false".equals(value) || "off".equals(value) || "0".equals(value)) {
+			debugMode = false;
+			sender.sendMessage("Debug mode disabled.");
+		} else {
+			sender.sendMessage("Invalid value. Use: true, false, on, off, 1, or 0");
+			return true;
+		}
+		return true;
+	}
+
+	public static boolean isDebugMode() {
+		return debugMode;
+	}
+
+	@Override
+	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+		String cmd = command.getName().toLowerCase();
+		// Tab completion for /atempfly (only debug)
+		if ("atempfly".equals(cmd)) {
+			if (args.length == 1) {
+				return java.util.Collections.singletonList("debug");
+			}
+			if (args.length == 2 && "debug".equalsIgnoreCase(args[0])) {
+				String input = args[1].toLowerCase();
+				List<String> opts = Arrays.asList("true", "false", "on", "off", "1", "0");
+				List<String> matches = new ArrayList<>();
+				for (String o : opts) if (o.startsWith(input)) matches.add(o);
+				return matches;
+			}
+			return new ArrayList<>();
+		}
+
+		// Tab completion for /tempfly (without debug)
+		if (args.length == 1) {
+			List<String> subcommands = new ArrayList<>();
+			subcommands.add("check");
+			subcommands.add("give");
+			subcommands.add("add");
+			subcommands.add("remove");
+			subcommands.add("reload");
+			
+			String input = args[0].toLowerCase();
+			List<String> matches = new ArrayList<>();
+			for (String sub : subcommands) {
+				if (sub.startsWith(input)) {
+					matches.add(sub);
+				}
+			}
+			return matches;
+		}
+		
+		if (args.length == 2) {
+			String subcommand = args[0].toLowerCase();
+			switch (subcommand) {
+				case "check":
+				case "give":
+				case "add":
+				case "remove":
+					// Autocomplete player names
+					List<String> playerNames = new ArrayList<>();
+					for (Player player : Bukkit.getOnlinePlayers()) {
+						if (player.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
+							playerNames.add(player.getName());
+						}
+					}
+					return playerNames;
+			}
+		}
+		
+		if (args.length == 3) {
+			String subcommand = args[0].toLowerCase();
+			if ("give".equals(subcommand) || "add".equals(subcommand) || "remove".equals(subcommand)) {
+				// Suggest common time formats
+				List<String> timeFormats = Arrays.asList("1m", "5m", "10m", "30m", "1h", "2h", "5h", "1d");
+				String input = args[2].toLowerCase();
+				List<String> matches = new ArrayList<>();
+				for (String format : timeFormats) {
+					if (format.startsWith(input)) {
+						matches.add(format);
+					}
+				}
+				return matches;
+			}
+		}
+		
+		return new ArrayList<>();
 	}
 }

@@ -68,6 +68,17 @@ public class TempFlyCommand implements CommandExecutor, TabCompleter {
 				}
 				plugin.reloadConfig();
 				messageManager.reload();
+				
+				// Reload flight restrictions
+				if (plugin instanceof com.github.djkingcraftero89.TH_TempFly.TH_TempFly) {
+					com.github.djkingcraftero89.TH_TempFly.TH_TempFly tempFlyPlugin = (com.github.djkingcraftero89.TH_TempFly.TH_TempFly) plugin;
+					if (tempFlyPlugin.getRestrictionManager() != null) {
+						List<String> blockedWorlds = plugin.getConfig().getStringList("fly.restrictions.blocked-worlds");
+						List<String> blockedRegions = plugin.getConfig().getStringList("fly.restrictions.blocked-regions");
+						tempFlyPlugin.getRestrictionManager().reload(blockedWorlds, blockedRegions);
+					}
+				}
+				
 				sender.sendMessage(messageManager.getMessage("commands.tempfly.reload.success"));
 				return true;
 			case "check":

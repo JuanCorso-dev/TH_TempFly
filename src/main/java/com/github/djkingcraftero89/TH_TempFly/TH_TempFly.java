@@ -204,4 +204,8 @@ public class TH_TempFly extends JavaPlugin {
 		
 		return SQLDataStore.createDataSource(jdbcUrl, user, pass, poolName, maxPool, minIdle, connTimeout);
 	}
+
+	public FlightRestrictionManager getRestrictionManager() {
+		return restrictionManager;
+	}
 }

@@ -1,104 +1,104 @@
 # TH_TempFly Plugin Messages
-# Customize all messages using Minecraft color codes with ampersand notation
+# Personaliza todos los mensajes usando códigos de color de Minecraft con notación de ampersand
 
-# Command messages
+# Mensajes de comandos
 commands:
-  no-permission: "&cYou don't have permission to use this command."
-  player-only: "&cThis command can only be used by players."
-  player-not-found: "&cPlayer not found: {player}"
-  specify-player: "&cPlease specify a player."
-  invalid-time: "&cInvalid time format. Use: 30s, 5m, 2h, 1d"
+  no-permission: "&cNo tienes permiso para usar este comando."
+  player-only: "&cEste comando solo puede ser usado por jugadores."
+  player-not-found: "&cJugador no encontrado: {player}"
+  specify-player: "&cPor favor especifica un jugador."
+  invalid-time: "&cFormato de tiempo inválido. Usa: 30s, 5m, 2h, 1d"
   
   # /tempfly command
   tempfly:
-    usage: "&e/tempfly <give|add|remove|check|reload> [player] [time]"
-    time-formats: "&7Time formats: &e30s, 5m, 2h, 1d &7or just &e30 &7for seconds"
-    unknown-subcommand: "&cUnknown subcommand."
+    usage: "&e/tempfly <give|add|remove|check|reload> [jugador] [tiempo]"
+    time-formats: "&7Formatos de tiempo: &e30s, 5m, 2h, 1d &7o simplemente &e30 &7para segundos"
+    unknown-subcommand: "&cSubcomando desconocido."
     
     # Subcommands
     reload:
-      success: "&aConfiguration reloaded."
+      success: "&aConfiguración recargada."
     
     check:
-      remaining: "&aRemaining fly time: &e{time}"
-      no-time: "&c{player} has no remaining fly time."
+      remaining: "&aTiempo de vuelo restante: &e{time}"
+      no-time: "&c{player} no tiene tiempo de vuelo restante."
     
     give:
-      usage: "&cUsage: /tempfly give <player> <time>"
-      example: "&7Example: &e/tempfly give PlayerName 1h"
-      success: "&aFly time set to &e{time}"
+      usage: "&cUso: /tempfly give <jugador> <tiempo>"
+      example: "&7Ejemplo: &e/tempfly give NombreJugador 1h"
+      success: "&aTiempo de vuelo establecido a &e{time}"
     
     add:
-      usage: "&cUsage: /tempfly add <player> <time>"
-      example: "&7Example: &e/tempfly add PlayerName 30m"
-      success: "&aFly time updated by &e{change}"
+      usage: "&cUso: /tempfly add <jugador> <tiempo>"
+      example: "&7Ejemplo: &e/tempfly add NombreJugador 30m"
+      success: "&aTiempo de vuelo actualizado en &e{change}"
     
     remove:
-      usage: "&cUsage: /tempfly remove <player> <time>"
-      example: "&7Example: &e/tempfly remove PlayerName 15m"
-      success: "&aFly time reduced by &e{change}"
+      usage: "&cUso: /tempfly remove <jugador> <tiempo>"
+      example: "&7Ejemplo: &e/tempfly remove NombreJugador 15m"
+      success: "&aTiempo de vuelo reducido en &e{change}"
 
 # /fly command
 fly:
-  no-permission: "&cYou don't have permission to use this command."
-  no-time: "&cYou have no remaining fly time."
-  contact-admin: "&7Contact an administrator to get fly time."
-  disabled: "&cFlight disabled."
-  enabled: "&aFlight enabled. Time remaining: &e{time}"
-  infinite-enabled: "&aInfinite flight enabled."
+  no-permission: "&cNo tienes permiso para usar este comando."
+  no-time: "&cNo tienes tiempo de vuelo restante."
+  contact-admin: "&7Contacta a un administrador para obtener tiempo de vuelo."
+  disabled: "&cVuelo desactivado."
+  enabled: "&aVuelo activado. Tiempo restante: &e{time}"
+  infinite-enabled: "&aVuelo infinito activado."
   
   # Flight restrictions
   restrictions:
-    world-blocked: "&cFlight is disabled in this world: &e{world}"
-    region-blocked: "&cFlight is disabled in this region: &e{region}"
-    entering-blocked-zone: "&cYou have entered a no-fly zone. Flight has been disabled."
+    world-blocked: "&cEl vuelo está desactivado en este mundo: &e{world}"
+    region-blocked: "&cEl vuelo está desactivado en esta región: &e{region}"
+    entering-blocked-zone: "&cHas entrado a una zona de no vuelo. El vuelo ha sido desactivado."
 
 # Event messages
 events:
   join:
-    welcome-back: "&aWelcome back! You have &e{time} &aof fly time remaining."
-    welcome-back-frozen: "&aWelcome back! You have &e{time} &aof fly time remaining. &7(Time freezes when offline)"
-    infinite-fly: "&aWelcome! You have infinite flight."
+    welcome-back: "&aBienvenido de vuelta! Tienes &e{time} &ade tiempo de vuelo restante."
+    welcome-back-frozen: "&aBienvenido de vuelta! Tienes &e{time} &ade tiempo de vuelo restante. &7(El tiempo se congela cuando estás desconectado)"
+    infinite-fly: "&aBienvenido! Tienes vuelo infinito."
   
   quit:
-    fly-disabled: "&cFlight disabled when leaving the server."
-    time-frozen: "&7Your fly time has been frozen and will resume when you return."
+    fly-disabled: "&cVuelo desactivado al salir del servidor."
+    time-frozen: "&7Tu tiempo de vuelo ha sido congelado y se reanudará cuando regreses."
   
-  time-expired: "&cYour fly time has expired!"
+  time-expired: "&cTu tiempo de vuelo ha expirado!"
   
   # Time system messages
   time-system:
-    frozen-mode: "&7Time freezes when you're offline - only counts down while playing!"
-    continuous-mode: "&7Time continues counting down even when you're offline!"
+    frozen-mode: "&7El tiempo se congela cuando estás desconectado - solo cuenta mientras juegas!"
+    continuous-mode: "&7El tiempo continúa contando incluso cuando estás desconectado!"
   
   # Title messages for fly time warnings
   titles:
-    warning-title: "&c&lFly Time Warning!"
-    warning-subtitle: "&e{seconds} seconds remaining"
-    expired-title: "&4&lFly Time Expired!"
-    expired-subtitle: "&cYour flight has been disabled"
+    warning-title: "&c&lAdvertencia de Tiempo de Vuelo!"
+    warning-subtitle: "&e{seconds} segundos restantes"
+    expired-title: "&4&lTiempo de Vuelo Expirado!"
+    expired-subtitle: "&cTu vuelo ha sido desactivado"
 
 # PlaceholderAPI messages
 placeholders:
-  no-time: "No time"
-  infinite: "Infinite"
-  flying: "Flying"
-  can-fly: "Can fly"
-  no-permission: "No permission"
+  no-time: "Sin tiempo"
+  infinite: "Infinito"
+  flying: "Volando"
+  can-fly: "Puede volar"
+  no-permission: "Sin permiso"
 
 # Configuration messages
 config:
   database:
-    initializing: "&7Initializing database..."
-    initialized: "&aDatabase initialized successfully"
-    error: "&cError initializing database: {error}"
+    initializing: "&7Inicializando base de datos..."
+    initialized: "&aBase de datos inicializada exitosamente"
+    error: "&cError al inicializar la base de datos: {error}"
   
   plugin:
-    starting: "&7Starting TH_TempFly plugin..."
-    config-loaded: "&aConfiguration loaded successfully"
-    commands-registered: "&aCommands registered successfully"
-    listeners-registered: "&aListeners registered successfully"
-    placeholderapi-registered: "&aPlaceholderAPI expansion registered successfully!"
-    placeholderapi-not-found: "&7PlaceholderAPI not found, placeholders will not be available."
-    enabled: "&aTH_TempFly plugin enabled successfully!"
-    disabled: "&cTH_TempFly plugin disabled."
+    starting: "&7Iniciando plugin TH_TempFly..."
+    config-loaded: "&aConfiguración cargada exitosamente"
+    commands-registered: "&aComandos registrados exitosamente"
+    listeners-registered: "&aListeners registrados exitosamente"
+    placeholderapi-registered: "&aExpansión de PlaceholderAPI registrada exitosamente!"
+    placeholderapi-not-found: "&7PlaceholderAPI no encontrado, los placeholders no estarán disponibles."
+    enabled: "&aPlugin TH_TempFly activado exitosamente!"
+    disabled: "&cPlugin TH_TempFly desactivado."

@@ -9,7 +9,7 @@ softdepend: [PlaceholderAPI, WorldGuard]
 commands:
   tempfly:
     description: Manage temporary fly time for players
-    usage: "/tempfly <give|add|remove|check|reload> [player] [time]"
+    usage: "/tempfly <give|add|remove|check|reload|version> [player] [time]"
     aliases: [tfly]
     permission: thtempfly.use
   fly:

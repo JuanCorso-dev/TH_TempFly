@@ -86,6 +86,14 @@ placeholders:
   can-fly: "Puede volar"
   no-permission: "Sin permiso"
 
+# Update checker messages
+update:
+  available: "&e&lNew version available! &7Current: &cv{current} &7→ Latest: &av{latest}"
+  download-url: "&7Download: &b{url}"
+  up-to-date: "&aTH_TempFly is up to date! &7(v{version})"
+  checking: "&7Checking for updates..."
+  check-failed: "&cCould not check for updates. Please check manually."
+
 # Configuration messages
 config:
   database:

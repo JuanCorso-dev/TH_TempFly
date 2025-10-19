@@ -42,6 +42,7 @@ A comprehensive temporary flight plugin for Minecraft servers with SQL/Redis sup
 - `/tempfly remove <player> <time>` - Remove flight time from player
 - `/tempfly check <player>` - Check player's remaining flight time
 - `/tempfly reload` - Reload plugin configuration
+- `/tempfly version` - Check current version and available updates
 
 ### Player Commands
 - `/fly` - Toggle flight mode (if you have time/permission)
@@ -132,18 +133,31 @@ fly:
 
 ## Building
 
-1. Clone the repository
-2. Run `mvn clean package`
-3. Find the compiled JAR in `target/TH_TempFly-1.2.0.jar`
+### Development Build (No version change)
+```bash
+mvn clean package
+```
+
+### Release Build (Auto-increments version)
+```bash
+mvn clean package -Prelease
+```
+This will automatically increment the version (e.g., 1.2.0 → 1.2.1) and build the JAR.
+
+Find the compiled JAR in `target/TH_TempFly-[version].jar`
 
 ## Changelog
 
-### v1.2.0 (WorldGuard Integration)
+### v1.2.0 (WorldGuard Integration & Update Checker)
 - Added WorldGuard integration for region-based restrictions
 - Block flight in specific worlds (configurable list)
 - Block flight in specific WorldGuard regions
 - Automatic flight disable when entering blocked zones
 - Enhanced messages for restriction notifications
+- Auto-update checker from GitHub releases
+- Auto-version increment system for release builds
+- Added `/tempfly version` command
+- Admin notifications for new updates
 
 ### v1.1.0 (Stable Release)
 - All code and comments translated to English

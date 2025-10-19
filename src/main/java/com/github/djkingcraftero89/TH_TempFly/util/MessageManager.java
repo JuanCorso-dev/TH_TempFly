@@ -143,6 +143,13 @@ public class MessageManager {
         return getMessage(key, placeholders);
     }
 
+    public String getMessage(String key, String placeholder1, String value1, String placeholder2, String value2) {
+        Map<String, String> placeholders = new HashMap<>();
+        placeholders.put(placeholder1, value1);
+        placeholders.put(placeholder2, value2);
+        return getMessage(key, placeholders);
+    }
+
     public void reload() {
         loadMessages();
     }

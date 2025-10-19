@@ -1,8 +1,10 @@
 package com.github.djkingcraftero89.TH_TempFly.listener;
 
+import com.github.djkingcraftero89.TH_TempFly.TH_TempFly;
 import com.github.djkingcraftero89.TH_TempFly.fly.FlyManager;
 import com.github.djkingcraftero89.TH_TempFly.restriction.FlightRestrictionManager;
 import com.github.djkingcraftero89.TH_TempFly.util.MessageManager;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,24 +14,33 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerListener implements Listener {
+	private final TH_TempFly plugin;
 	private final FlyManager flyManager;
 	private final FlightRestrictionManager restrictionManager;
 	private final MessageManager messageManager;
 	private final boolean enableOnJoin;
 	private final boolean disableOnQuit;
+	private final boolean notifyAdmins;
 
-	public PlayerListener(FlyManager flyManager, FlightRestrictionManager restrictionManager, MessageManager messageManager, boolean enableOnJoin, boolean disableOnQuit) {
+	public PlayerListener(TH_TempFly plugin, FlyManager flyManager, FlightRestrictionManager restrictionManager, MessageManager messageManager, boolean enableOnJoin, boolean disableOnQuit, boolean notifyAdmins) {
+		this.plugin = plugin;
 		this.flyManager = flyManager;
 		this.restrictionManager = restrictionManager;
 		this.messageManager = messageManager;
 		this.enableOnJoin = enableOnJoin;
 		this.disableOnQuit = disableOnQuit;
+		this.notifyAdmins = notifyAdmins;
 	}
 
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
 		Player p = e.getPlayer();
 		flyManager.loadPlayer(p, enableOnJoin);
+		
+		// Notify admin about updates if available
+		if (notifyAdmins && p.hasPermission("thtempfly.admin") && plugin.getUpdateChecker() != null) {
+			plugin.getUpdateChecker().notifyPlayer(p, messageManager);
+		}
 	}
 
 	@EventHandler

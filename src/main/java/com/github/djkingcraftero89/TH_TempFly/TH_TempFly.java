@@ -10,6 +10,7 @@ import com.github.djkingcraftero89.TH_TempFly.restriction.FlightRestrictionManag
 import com.github.djkingcraftero89.TH_TempFly.storage.DataStore;
 import com.github.djkingcraftero89.TH_TempFly.storage.SQLDataStore;
 import com.github.djkingcraftero89.TH_TempFly.util.MessageManager;
+import com.github.djkingcraftero89.TH_TempFly.util.UpdateChecker;
 import com.zaxxer.hikari.HikariDataSource;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -25,6 +26,7 @@ public class TH_TempFly extends JavaPlugin {
 	private RedisService redisService;
 	private MessageManager messageManager;
 	private FlightRestrictionManager restrictionManager;
+	private UpdateChecker updateChecker;
 
 	@Override
 	public void onEnable() {
@@ -163,8 +165,19 @@ public class TH_TempFly extends JavaPlugin {
 		getLogger().info("Registering listeners...");
 		boolean enableOnJoin = cfg.getBoolean("fly.enable-on-join-if-leftover", true);
 		boolean disableOnQuit = cfg.getBoolean("fly.disable-on-quit", true);
-		getServer().getPluginManager().registerEvents(new PlayerListener(flyManager, restrictionManager, messageManager, enableOnJoin, disableOnQuit), this);
+		boolean notifyAdmins = cfg.getBoolean("update-checker.notify-admins", true);
+		getServer().getPluginManager().registerEvents(new PlayerListener(this, flyManager, restrictionManager, messageManager, enableOnJoin, disableOnQuit, notifyAdmins), this);
 		getLogger().info("Listeners registered successfully");
+		
+		// Check for updates if enabled
+		if (cfg.getBoolean("update-checker.enabled", true)) {
+			this.updateChecker = new UpdateChecker(this, "JuanCorso-dev", "TH_TempFly");
+			updateChecker.checkForUpdates().thenAccept(updateAvailable -> {
+				if (updateAvailable) {
+					updateChecker.notifyConsole(messageManager);
+				}
+			});
+		}
 		
 		getLogger().info("TH_TempFly plugin enabled successfully!");
 	}
@@ -207,5 +220,9 @@ public class TH_TempFly extends JavaPlugin {
 
 	public FlightRestrictionManager getRestrictionManager() {
 		return restrictionManager;
+	}
+
+	public UpdateChecker getUpdateChecker() {
+		return updateChecker;
 	}
 }

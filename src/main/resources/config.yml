@@ -1,3 +1,10 @@
+# Update checker configuration
+update-checker:
+  # Check for new versions on plugin startup
+  enabled: true
+  # Notify admins when they join if update is available
+  notify-admins: true
+
 storage:
   # type: SQLITE or MYSQL
   type: SQLITE

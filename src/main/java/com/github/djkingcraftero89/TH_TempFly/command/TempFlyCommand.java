@@ -94,6 +94,16 @@ public class TempFlyCommand implements CommandExecutor, TabCompleter {
 				return handleAdd(sender, args, true);
 			case "remove":
 				return handleAdd(sender, args, false);
+			case "version":
+				if (plugin instanceof com.github.djkingcraftero89.TH_TempFly.TH_TempFly) {
+					com.github.djkingcraftero89.TH_TempFly.TH_TempFly tempFlyPlugin = (com.github.djkingcraftero89.TH_TempFly.TH_TempFly) plugin;
+					if (tempFlyPlugin.getUpdateChecker() != null) {
+						sender.sendMessage(tempFlyPlugin.getUpdateChecker().getVersionInfo());
+					} else {
+						sender.sendMessage("§eTH_TempFly §7v" + plugin.getDescription().getVersion());
+					}
+				}
+				return true;
 			default:
 				sender.sendMessage(messageManager.getMessage("commands.tempfly.unknown-subcommand"));
 				return true;
@@ -221,6 +231,7 @@ public class TempFlyCommand implements CommandExecutor, TabCompleter {
 			subcommands.add("add");
 			subcommands.add("remove");
 			subcommands.add("reload");
+			subcommands.add("version");
 			
 			String input = args[0].toLowerCase();
 			List<String> matches = new ArrayList<>();

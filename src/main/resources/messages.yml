@@ -46,6 +46,12 @@ fly:
   disabled: "&cFlight disabled."
   enabled: "&aFlight enabled. Time remaining: &e{time}"
   infinite-enabled: "&aInfinite flight enabled."
+  
+  # Flight restrictions
+  restrictions:
+    world-blocked: "&cFlight is disabled in this world: &e{world}"
+    region-blocked: "&cFlight is disabled in this region: &e{region}"
+    entering-blocked-zone: "&cYou have entered a no-fly zone. Flight has been disabled."
 
 # Event messages
 events:

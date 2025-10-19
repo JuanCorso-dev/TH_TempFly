@@ -6,6 +6,7 @@ import com.github.djkingcraftero89.TH_TempFly.fly.FlyManager;
 import com.github.djkingcraftero89.TH_TempFly.listener.PlayerListener;
 import com.github.djkingcraftero89.TH_TempFly.placeholder.TempFlyPlaceholder;
 import com.github.djkingcraftero89.TH_TempFly.redis.RedisService;
+import com.github.djkingcraftero89.TH_TempFly.restriction.FlightRestrictionManager;
 import com.github.djkingcraftero89.TH_TempFly.storage.DataStore;
 import com.github.djkingcraftero89.TH_TempFly.storage.SQLDataStore;
 import com.github.djkingcraftero89.TH_TempFly.util.MessageManager;
@@ -15,6 +16,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.List;
 import java.util.UUID;
 
 public class TH_TempFly extends JavaPlugin {
@@ -22,6 +24,7 @@ public class TH_TempFly extends JavaPlugin {
 	private FlyManager flyManager;
 	private RedisService redisService;
 	private MessageManager messageManager;
+	private FlightRestrictionManager restrictionManager;
 
 	@Override
 	public void onEnable() {
@@ -65,6 +68,12 @@ public class TH_TempFly extends JavaPlugin {
 		
 		getLogger().info("Freeze time when offline: " + freezeTimeWhenOffline);
 		getLogger().info("Title system enabled: " + titlesEnabled + " (threshold: " + warningThreshold + "s)");
+		
+		// Initialize flight restrictions
+		boolean restrictionsEnabled = cfg.getBoolean("fly.restrictions.enabled", true);
+		List<String> blockedWorlds = cfg.getStringList("fly.restrictions.blocked-worlds");
+		List<String> blockedRegions = cfg.getStringList("fly.restrictions.blocked-regions");
+		this.restrictionManager = new FlightRestrictionManager(this, blockedWorlds, blockedRegions, restrictionsEnabled);
 		
 		// Initialize Redis if enabled
 		boolean redisEnabled = cfg.getBoolean("redis.enabled", false);
@@ -139,7 +148,7 @@ public class TH_TempFly extends JavaPlugin {
 		getCommand("tempfly").setTabCompleter(tempFlyCommand);
 		getCommand("atempfly").setExecutor(tempFlyCommand);
 		getCommand("atempfly").setTabCompleter(tempFlyCommand);
-		getCommand("fly").setExecutor(new FlyCommand(flyManager, messageManager));
+		getCommand("fly").setExecutor(new FlyCommand(flyManager, messageManager, restrictionManager));
 		getLogger().info("Commands registered successfully");
 
 		// Register PlaceholderAPI expansion
@@ -154,7 +163,7 @@ public class TH_TempFly extends JavaPlugin {
 		getLogger().info("Registering listeners...");
 		boolean enableOnJoin = cfg.getBoolean("fly.enable-on-join-if-leftover", true);
 		boolean disableOnQuit = cfg.getBoolean("fly.disable-on-quit", true);
-		getServer().getPluginManager().registerEvents(new PlayerListener(flyManager, enableOnJoin, disableOnQuit), this);
+		getServer().getPluginManager().registerEvents(new PlayerListener(flyManager, restrictionManager, messageManager, enableOnJoin, disableOnQuit), this);
 		getLogger().info("Listeners registered successfully");
 		
 		getLogger().info("TH_TempFly plugin enabled successfully!");

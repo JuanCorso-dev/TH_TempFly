@@ -58,3 +58,17 @@ fly:
     warning-threshold: 5
     # Update interval for countdown titles in ticks (20 ticks = 1 second)
     update-interval: 20
+  
+  # Flight restriction system
+  restrictions:
+    # Enable or disable flight restrictions completely
+    enabled: true
+    # List of worlds where flight is disabled
+    # Players will not be able to use /fly in these worlds
+    # Example: ["world_nether", "world_the_end", "pvp_arena"]
+    blocked-worlds: []
+    # List of WorldGuard regions where flight is disabled
+    # Requires WorldGuard plugin to be installed
+    # Players entering these regions will have flight disabled automatically
+    # Example: ["spawn", "pvp_zone", "no_fly_area"]
+    blocked-regions: []

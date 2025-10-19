@@ -3,9 +3,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.djkingcraftero89</groupId>
   <artifactId>TH_TempFly</artifactId>
-  <version>1.1.0</version>
+  <version>1.2.0</version>
   <name>TH_TempFly</name>
-  <description>Temporary fly plugin with SQL and Redis support for multi-server networks</description>
+  <description>Temporary fly plugin with SQL, Redis, and WorldGuard region restrictions for multi-server networks</description>
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
@@ -17,6 +17,7 @@
     <mysql.version>8.4.0</mysql.version>
     <lettuce.version>6.3.2.RELEASE</lettuce.version>
     <placeholderapi.version>2.11.6</placeholderapi.version>
+    <worldguard.version>7.0.9</worldguard.version>
   </properties>
 
   <repositories>
@@ -31,6 +32,10 @@
     <repository>
       <id>placeholderapi</id>
       <url>https://repo.extendedclip.com/releases/</url>
+    </repository>
+    <repository>
+      <id>enginehub-maven</id>
+      <url>https://maven.enginehub.org/repo/</url>
     </repository>
   </repositories>
 
@@ -72,6 +77,13 @@
       <groupId>me.clip</groupId>
       <artifactId>placeholderapi</artifactId>
       <version>${placeholderapi.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sk89q.worldguard</groupId>
+      <artifactId>worldguard-bukkit</artifactId>
+      <version>${worldguard.version}</version>
       <scope>provided</scope>
     </dependency>
 

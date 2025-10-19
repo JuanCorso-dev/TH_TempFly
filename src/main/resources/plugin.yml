@@ -2,9 +2,9 @@ main: com.github.djkingcraftero89.TH_TempFly.TH_TempFly
 version: ${project.version}
 name: TH_TempFly
 authors: [JuanCorso]
-description: Temporary fly plugin with SQL and Redis support for multi-server networks
+description: Temporary fly plugin with SQL, Redis, and WorldGuard region restrictions for multi-server networks
 api-version: 1.20
-softdepend: [PlaceholderAPI]
+softdepend: [PlaceholderAPI, WorldGuard]
 
 commands:
   tempfly:

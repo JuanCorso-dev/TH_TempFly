@@ -1,11 +1,12 @@
 # TH_TempFly
 
-A comprehensive temporary flight plugin for Minecraft servers with SQL/Redis support, PlaceholderAPI integration, and customizable messages.
+A comprehensive temporary flight plugin for Minecraft servers with SQL/Redis support, PlaceholderAPI integration, WorldGuard region restrictions, and customizable messages.
 
 ## Features
 
 - **Temporary Flight System**: Give players limited flight time
 - **Infinite Flight Permission**: Special permission for unlimited flight
+- **WorldGuard Integration**: Block flight in specific regions or entire worlds
 - **Database Support**: SQLite and MySQL support with HikariCP
 - **Redis Synchronization**: Multi-server synchronization support
 - **PlaceholderAPI Integration**: Display flight time in other plugins
@@ -15,6 +16,7 @@ A comprehensive temporary flight plugin for Minecraft servers with SQL/Redis sup
 - **bStats Integration**: Anonymous usage statistics to help improve the plugin
 - **Title Warnings**: Visual countdown warnings when fly time is running out
 - **Time Freeze Mode**: Option to freeze time when players are offline
+- **Flight Restrictions**: Automatically disable flight when entering blocked zones
 
 ## Requirements
 
@@ -22,13 +24,15 @@ A comprehensive temporary flight plugin for Minecraft servers with SQL/Redis sup
 - **Java**: 17+
 - **Server Software**: Paper, Spigot, or Bukkit
 - **Optional**: PlaceholderAPI for placeholders
+- **Optional**: WorldGuard for region-based flight restrictions
 
 ## Installation
 
-1. Download the latest `TH_TempFly-1.1.0.jar` from releases
+1. Download the latest `TH_TempFly-1.2.0.jar` from releases
 2. Place it in your server's `plugins` folder
-3. Restart your server
-4. Configure the plugin in `plugins/TH_TempFly/config.yml`
+3. (Optional) Install WorldGuard if you want region-based restrictions
+4. Restart your server
+5. Configure the plugin in `plugins/TH_TempFly/config.yml`
 
 ## Commands
 
@@ -111,15 +115,35 @@ fly:
   enabled: "&aFlight enabled. Time remaining: &e{time}"
   infinite-enabled: "&aInfinite flight enabled!"
   disabled: "&cFlight disabled."
+  restrictions:
+    world-blocked: "&cFlight is disabled in this world: &e{world}"
+    region-blocked: "&cFlight is disabled in this region: &e{region}"
+```
+
+### Flight Restrictions Configuration
+
+```yaml
+fly:
+  restrictions:
+    enabled: true
+    blocked-worlds: ["world_nether", "pvp_arena"]
+    blocked-regions: ["spawn", "safezone"]
 ```
 
 ## Building
 
 1. Clone the repository
 2. Run `mvn clean package`
-3. Find the compiled JAR in `target/TH_TempFly-1.1.0.jar`
+3. Find the compiled JAR in `target/TH_TempFly-1.2.0.jar`
 
 ## Changelog
+
+### v1.2.0 (WorldGuard Integration)
+- Added WorldGuard integration for region-based restrictions
+- Block flight in specific worlds (configurable list)
+- Block flight in specific WorldGuard regions
+- Automatic flight disable when entering blocked zones
+- Enhanced messages for restriction notifications
 
 ### v1.1.0 (Stable Release)
 - All code and comments translated to English

@@ -46,3 +46,12 @@ cache/
 
 # Maven directory
 apache-maven-*/
+
+# AI / Documentation to ignore
+.claude/
+CLAUDE.md
+INSTRUCCIONES.md
+INSTRUCTIONS.md
+RESUMEN_INTEGRACION_VULCAN.md
+VULCAN_INTEGRATION.md
+message.txt

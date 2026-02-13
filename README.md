@@ -62,6 +62,7 @@ A comprehensive temporary flight plugin for Minecraft servers with SQL/Redis sup
 | `thtempfly.admin` | Manage other players' flight time | op |
 | `thtempfly.fly.use` | Use /fly command | true |
 | `thtempfly.fly.infinite` | Infinite flight permission | op |
+| `thtempfly.fly.bypass` | Bypass flight restrictions in blocked worlds and regions | op |
 
 ## Placeholders (PlaceholderAPI)
 
@@ -130,6 +131,11 @@ fly:
     blocked-worlds: ["world_nether", "pvp_arena"]
     blocked-regions: ["spawn", "safezone"]
 ```
+
+**Bypass Permissions:**
+- Players with `thtempfly.fly.bypass` permission can fly in blocked worlds and regions
+- This permission is useful for staff members who need to access restricted areas
+- Default: Only operators have this permission
 
 ## Building
 

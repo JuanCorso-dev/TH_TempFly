@@ -3,18 +3,39 @@ version: ${project.version}
 name: TH_TempFly
 authors: [JuanCorso]
 description: Temporary fly plugin with SQL, Redis, and WorldGuard region restrictions for multi-server networks
-api-version: 1.20
-softdepend: [PlaceholderAPI, WorldGuard]
+api-version: 1.21
+softdepend: [PlaceholderAPI, WorldGuard, Vulcan]
+
+# Paper's native library loader - automatically downloads from Maven Central
+libraries:
+  # Database libraries
+  - com.zaxxer:HikariCP:5.1.0
+  - org.slf4j:slf4j-api:2.0.9
+  - org.xerial:sqlite-jdbc:3.46.0.0
+  - com.mysql:mysql-connector-j:8.4.0
+  - com.google.protobuf:protobuf-java:3.25.1
+
+  # Redis libraries
+  - io.lettuce:lettuce-core:6.3.2.RELEASE
+  - io.netty:netty-common:4.1.107.Final
+  - io.netty:netty-handler:4.1.107.Final
+  - io.netty:netty-transport:4.1.107.Final
+  - io.netty:netty-buffer:4.1.107.Final
+  - io.netty:netty-codec:4.1.107.Final
+  - io.netty:netty-resolver:4.1.107.Final
+  - io.netty:netty-transport-native-unix-common:4.1.107.Final
+  - io.projectreactor:reactor-core:3.6.4
+  - org.reactivestreams:reactive-streams:1.0.4
 
 commands:
   tempfly:
     description: Manage temporary fly time for players
-    usage: "/tempfly <give|add|remove|check|reload|version> [player] [time]"
+    usage: "/tempfly <give|add|remove|check|reload|version|migrate> [player] [time]"
     aliases: [tfly]
     permission: thtempfly.use
   fly:
-    description: Toggle flight mode for yourself
-    usage: "/fly"
+    description: Toggle flight mode or manage flight for yourself
+    usage: "/fly [toggle|on|off|check]"
     permission: thtempfly.fly.use
   atempfly:
     description: Admin debug command for TempFly
@@ -36,4 +57,7 @@ permissions:
     default: true
   thtempfly.fly.infinite:
     description: Allows player to have infinite fly time
+    default: op
+  thtempfly.fly.bypass:
+    description: Allows player to bypass flight restrictions in blocked worlds and regions
     default: op

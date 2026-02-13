@@ -14,6 +14,7 @@ import java.util.Map;
 public class MessageManager {
     private final Plugin plugin;
     private FileConfiguration messagesConfig;
+    private FileConfiguration defaultMessagesConfig;
     private final Map<String, String> messageCache = new HashMap<>();
 
     public MessageManager(Plugin plugin) {
@@ -29,6 +30,16 @@ public class MessageManager {
         }
         
         messagesConfig = YamlConfiguration.loadConfiguration(messagesFile);
+        
+        // Load default messages from resource
+        try (java.io.InputStream is = plugin.getResource("messages.yml")) {
+            if (is != null) {
+                defaultMessagesConfig = YamlConfiguration.loadConfiguration(new java.io.InputStreamReader(is));
+            }
+        } catch (Exception e) {
+            // Ignore if resource not found
+        }
+        
         messageCache.clear();
         loadAllMessages();
     }
@@ -55,7 +66,9 @@ public class MessageManager {
         String[] tempflyKeys = {
             "usage", "time-formats", "unknown-subcommand", "reload.success",
             "check.remaining", "check.no-time", "give.usage", "give.example", "give.success",
-            "add.usage", "add.example", "add.success", "remove.usage", "remove.example", "remove.success"
+            "add.usage", "add.example", "add.success", "remove.usage", "remove.example", "remove.success",
+            "migrate.starting", "migrate.success", "migrate.error.not-plugin", "migrate.error.not-mysql",
+            "migrate.error.no-sqlite", "migrate.error.no-datasource", "migrate.error.general"
         };
         
         for (String key : tempflyKeys) {
@@ -119,7 +132,19 @@ public class MessageManager {
     public String getMessage(String key) {
         String message = messageCache.get(key);
         if (message == null) {
-            message = messagesConfig.getString(key, "&cMessage not found: " + key);
+            // First try to get from user's messages.yml
+            message = messagesConfig.getString(key);
+            
+            // If not found, try to get from default resource
+            if (message == null && defaultMessagesConfig != null) {
+                message = defaultMessagesConfig.getString(key);
+            }
+            
+            // If still not found, use default error message
+            if (message == null) {
+                message = "&cMessage not found: " + key;
+            }
+            
             messageCache.put(key, message);
         }
         return ChatColor.translateAlternateColorCodes('&', message);

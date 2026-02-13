@@ -1,6 +1,8 @@
 package com.github.djkingcraftero89.TH_TempFly.fly;
 
+import com.github.djkingcraftero89.TH_TempFly.cache.PermissionCache;
 import com.github.djkingcraftero89.TH_TempFly.command.TempFlyCommand;
+import com.github.djkingcraftero89.TH_TempFly.integration.VulcanIntegration;
 import com.github.djkingcraftero89.TH_TempFly.redis.RedisService;
 import com.github.djkingcraftero89.TH_TempFly.storage.DataStore;
 import com.github.djkingcraftero89.TH_TempFly.util.MessageManager;
@@ -19,7 +21,9 @@ public class FlyManager {
 	private final DataStore dataStore;
 	private final MessageManager messageManager;
 	private final RedisService redisService;
+	private final VulcanIntegration vulcanIntegration;
 	private final Map<UUID, Long> playerToRemainingSeconds = new HashMap<>();
+	private final PermissionCache permissionCache;
 	private final int tickIntervalTicks;
 	private final long saveIntervalSeconds;
 	private final boolean freezeTimeWhenOffline;
@@ -35,11 +39,12 @@ public class FlyManager {
 	private int taskId = -1;
 	private long lastSaveEpochSecond = 0L;
 
-	public FlyManager(Plugin plugin, DataStore dataStore, MessageManager messageManager, RedisService redisService, int tickIntervalTicks, long saveIntervalSeconds, boolean freezeTimeWhenOffline, boolean titlesEnabled, long warningThreshold, int titleUpdateInterval) {
+	public FlyManager(Plugin plugin, DataStore dataStore, MessageManager messageManager, RedisService redisService, VulcanIntegration vulcanIntegration, int tickIntervalTicks, long saveIntervalSeconds, boolean freezeTimeWhenOffline, boolean titlesEnabled, long warningThreshold, int titleUpdateInterval) {
 		this.plugin = plugin;
 		this.dataStore = dataStore;
 		this.messageManager = messageManager;
 		this.redisService = redisService;
+		this.vulcanIntegration = vulcanIntegration;
 		this.tickIntervalTicks = tickIntervalTicks;
 		this.saveIntervalSeconds = saveIntervalSeconds;
 		this.freezeTimeWhenOffline = freezeTimeWhenOffline;
@@ -47,6 +52,10 @@ public class FlyManager {
 		this.warningThreshold = warningThreshold;
 		this.titleUpdateInterval = titleUpdateInterval;
 		this.fullBroadcastEnabled = plugin.getConfig().getBoolean("redis.sync.full-broadcast-enabled", false);
+
+		// Initialize PermissionCache for tick loop optimization
+		long permCacheDuration = plugin.getConfig().getLong("fly.performance.permission-cache-duration-ms", 1000L);
+		this.permissionCache = new PermissionCache(permCacheDuration);
 	}
 
 	public void start() {
@@ -87,62 +96,81 @@ public class FlyManager {
 
 	private void tickOnlinePlayersOnly() {
 		long secondsToDeduct = tickIntervalTicks / 20L;
-		
+
 		for (Player p : Bukkit.getOnlinePlayers()) {
-			if (p.hasPermission("thtempfly.fly.infinite") || !p.isFlying()) {
+			// Early exits: check cheap conditions first
+			if (!p.isFlying()) {
 				continue;
 			}
-			
+
+			// Use cached permission check (reduces overhead significantly)
+			if (permissionCache.hasInfiniteFly(p)) {
+				continue;
+			}
+
 			UUID id = p.getUniqueId();
 			long remaining = playerToRemainingSeconds.getOrDefault(id, 0L);
-			
+
+			// No time and no infinite permission: disable flight (e.g. permission was removed)
 			if (remaining <= 0) {
+				disableFlight(p);
+				playerToRemainingSeconds.put(id, 0L);
 				continue;
 			}
-			
+
 			remaining -= secondsToDeduct;
-			
+
 			if (remaining <= 0) {
 				remaining = 0;
 				disableFlight(p);
 			} else {
 				showTitleWarningIfNeeded(p, remaining);
 			}
-			
+
 			playerToRemainingSeconds.put(id, remaining);
 		}
 	}
 
 	private void tickAllPlayers() {
 		long secondsToDeduct = tickIntervalTicks / 20L;
-		
+
 		for (Map.Entry<UUID, Long> entry : playerToRemainingSeconds.entrySet()) {
 			UUID id = entry.getKey();
 			long remaining = entry.getValue();
-			
-			if (remaining <= 0) {
-				continue;
-			}
-			
+
 			Player p = Bukkit.getPlayer(id);
-			
-			if (p == null || !p.isFlying()) {
+			if (p == null) {
 				continue;
 			}
-			
-			if (p.hasPermission("thtempfly.fly.infinite")) {
+
+			// No time and no infinite permission: disable flight if still flying (e.g. permission was removed)
+			if (remaining <= 0) {
+				if (p.isFlying() && !permissionCache.hasInfiniteFly(p)) {
+					disableFlight(p);
+				}
+				playerToRemainingSeconds.put(id, 0L);
 				continue;
 			}
-			
+
+			// Early exit if player not flying
+			if (!p.isFlying()) {
+				continue;
+			}
+
+			// Use cached permission check (reduces overhead significantly)
+			if (permissionCache.hasInfiniteFly(p)) {
+				continue;
+			}
+
 			remaining -= secondsToDeduct;
-			
+
 			if (remaining <= 0) {
 				remaining = 0;
 				disableFlight(p);
 			} else {
 				showTitleWarningIfNeeded(p, remaining);
 			}
-			
+
 			playerToRemainingSeconds.put(id, remaining);
 		}
 	}
@@ -168,6 +196,12 @@ public class FlyManager {
 					if (enableOnJoin && sec > 0) {
 						p.setAllowFlight(true);
 						p.setFlying(true);
+						
+						// Habilitar excepciones de Vulcan cuando se activa el fly
+						if (vulcanIntegration != null) {
+							vulcanIntegration.enableFlyExemption(p);
+						}
+						
 						String formattedTime = TimeParser.formatSeconds(sec);
 						
 						// Use specific message based on time mode
@@ -235,6 +269,15 @@ public class FlyManager {
 				boolean shouldFly = valueToStore != 0L;
 				p.setAllowFlight(shouldFly);
 				p.setFlying(shouldFly);
+				
+				// Actualizar excepciones de Vulcan según el estado del fly
+				if (vulcanIntegration != null) {
+					if (shouldFly) {
+						vulcanIntegration.enableFlyExemption(p);
+					} else {
+						vulcanIntegration.disableFlyExemption(p);
+					}
+				}
 			}
 		}
 		
@@ -257,6 +300,15 @@ public class FlyManager {
 				boolean shouldFly = valueToStore != 0L;
 				p.setAllowFlight(shouldFly);
 				p.setFlying(shouldFly);
+				
+				// Actualizar excepciones de Vulcan según el estado del fly
+				if (vulcanIntegration != null) {
+					if (shouldFly) {
+						vulcanIntegration.enableFlyExemption(p);
+					} else {
+						vulcanIntegration.disableFlyExemption(p);
+					}
+				}
 			}
 		}
 	}
@@ -272,8 +324,26 @@ public class FlyManager {
 	}
 
 	public void saveAll() {
-		for (Map.Entry<UUID, Long> e : playerToRemainingSeconds.entrySet()) {
-			save(e.getKey(), e.getValue());
+		// Use batch operations for dramatically improved performance
+		// Instead of 100 individual saves, we do 2 batch operations (50 each)
+		try {
+			int batchSize = plugin.getConfig().getInt("storage.hikari.batch-size", 50);
+			if (dataStore instanceof com.github.djkingcraftero89.TH_TempFly.storage.SQLDataStore) {
+				((com.github.djkingcraftero89.TH_TempFly.storage.SQLDataStore) dataStore)
+						.batchSetRemainingSeconds(playerToRemainingSeconds, batchSize);
+			} else {
+				// Fallback to individual saves if not using SQLDataStore
+				for (Map.Entry<UUID, Long> e : playerToRemainingSeconds.entrySet()) {
+					save(e.getKey(), e.getValue());
+				}
+			}
+		} catch (Exception e) {
+			plugin.getLogger().severe("Error during batch save: " + e.getMessage());
+			e.printStackTrace();
+			// Fallback to individual saves on error
+			for (Map.Entry<UUID, Long> entry : playerToRemainingSeconds.entrySet()) {
+				save(entry.getKey(), entry.getValue());
+			}
 		}
 	}
 
@@ -309,6 +379,12 @@ public class FlyManager {
 	private void disableFlight(Player player) {
 		player.setAllowFlight(false);
 		player.setFlying(false);
+		
+		// Deshabilitar excepciones de Vulcan cuando se desactiva el fly
+		if (vulcanIntegration != null) {
+			vulcanIntegration.disableFlyExemption(player);
+		}
+		
 		player.sendMessage(messageManager.getMessage("events.time-expired"));
 		
 		if (titlesEnabled) {

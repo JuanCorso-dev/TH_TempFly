@@ -3,21 +3,22 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.djkingcraftero89</groupId>
   <artifactId>TH_TempFly</artifactId>
-  <version>1.2.1</version>
+  <version>1.2.3</version>
   <name>TH_TempFly</name>
   <description>Temporary fly plugin with SQL, Redis, and WorldGuard region restrictions for multi-server networks</description>
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <paper.api.version>1.20.6-R0.1-SNAPSHOT</paper.api.version>
-    <spigot.api.version>1.20.6-R0.1-SNAPSHOT</spigot.api.version>
+    <paper.api.version>1.21.4-R0.1-SNAPSHOT</paper.api.version>
+    <spigot.api.version>1.21.4-R0.1-SNAPSHOT</spigot.api.version>
     <hikari.version>5.1.0</hikari.version>
     <sqlite.version>3.46.0.0</sqlite.version>
     <mysql.version>8.4.0</mysql.version>
     <lettuce.version>6.3.2.RELEASE</lettuce.version>
     <placeholderapi.version>2.11.6</placeholderapi.version>
     <worldguard.version>7.0.9</worldguard.version>
+    <vulcan.version>2.8.8</vulcan.version>
   </properties>
 
   <repositories>
@@ -47,30 +48,33 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- Paper loads these via plugin.yml libraries section -->
     <dependency>
       <groupId>com.zaxxer</groupId>
       <artifactId>HikariCP</artifactId>
       <version>${hikari.version}</version>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.xerial</groupId>
       <artifactId>sqlite-jdbc</artifactId>
       <version>${sqlite.version}</version>
-      <scope>runtime</scope>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>com.mysql</groupId>
       <artifactId>mysql-connector-j</artifactId>
       <version>${mysql.version}</version>
-      <scope>runtime</scope>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>io.lettuce</groupId>
       <artifactId>lettuce-core</artifactId>
       <version>${lettuce.version}</version>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -86,6 +90,18 @@
       <version>${worldguard.version}</version>
       <scope>provided</scope>
     </dependency>
+
+    <!-- Vulcan API - Install Vulcan.jar in your local Maven repo to enable compilation with Vulcan -->
+    <!-- To install locally: mvn install:install-file -Dfile=Vulcan.jar -DgroupId=me.frep.vulcan -DartifactId=vulcan-api -Dversion=2.8.8 -Dpackaging=jar -->
+    <!-- UNCOMMENT THE FOLLOWING DEPENDENCY AFTER INSTALLING VULCAN TO LOCAL MAVEN REPO:
+    <dependency>
+      <groupId>me.frep.vulcan</groupId>
+      <artifactId>vulcan-api</artifactId>
+      <version>${vulcan.version}</version>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+    -->
 
     <dependency>
       <groupId>org.bstats</groupId>
@@ -152,15 +168,8 @@
             </goals>
             <configuration>
               <createDependencyReducedPom>false</createDependencyReducedPom>
+              <!-- Paper loads all libraries from plugin.yml, we only shade bStats -->
               <relocations>
-                <relocation>
-                  <pattern>com.zaxxer.hikari</pattern>
-                  <shadedPattern>com.th.tempfly.libs.hikari</shadedPattern>
-                </relocation>
-                <relocation>
-                  <pattern>io.lettuce</pattern>
-                  <shadedPattern>com.th.tempfly.libs.lettuce</shadedPattern>
-                </relocation>
                 <relocation>
                   <pattern>org.bstats</pattern>
                   <shadedPattern>com.github.djkingcraftero89.TH_TempFly.libs.bstats</shadedPattern>

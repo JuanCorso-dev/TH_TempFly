@@ -2,8 +2,10 @@ package com.github.djkingcraftero89.TH_TempFly.command;
 
 import com.github.djkingcraftero89.TH_TempFly.fly.FlyManager;
 import com.github.djkingcraftero89.TH_TempFly.storage.DataStore;
+import com.github.djkingcraftero89.TH_TempFly.storage.DatabaseMigrator;
 import com.github.djkingcraftero89.TH_TempFly.util.MessageManager;
 import com.github.djkingcraftero89.TH_TempFly.util.TimeParser;
+import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -12,10 +14,13 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class TempFlyCommand implements CommandExecutor, TabCompleter {
@@ -104,6 +109,12 @@ public class TempFlyCommand implements CommandExecutor, TabCompleter {
 					}
 				}
 				return true;
+			case "migrate":
+				if (!sender.hasPermission("thtempfly.admin")) {
+					sender.sendMessage(messageManager.getMessage("commands.no-permission"));
+					return true;
+				}
+				return handleMigrate(sender);
 			default:
 				sender.sendMessage(messageManager.getMessage("commands.tempfly.unknown-subcommand"));
 				return true;
@@ -205,6 +216,86 @@ public class TempFlyCommand implements CommandExecutor, TabCompleter {
 		return debugMode;
 	}
 
+	private boolean handleMigrate(CommandSender sender) {
+		if (!(plugin instanceof com.github.djkingcraftero89.TH_TempFly.TH_TempFly)) {
+			sender.sendMessage(messageManager.getMessage("commands.tempfly.migrate.error.not-plugin"));
+			return true;
+		}
+		
+		if (!(plugin instanceof org.bukkit.plugin.java.JavaPlugin)) {
+			sender.sendMessage(messageManager.getMessage("commands.tempfly.migrate.error.not-plugin"));
+			return true;
+		}
+		
+		com.github.djkingcraftero89.TH_TempFly.TH_TempFly tempFlyPlugin = (com.github.djkingcraftero89.TH_TempFly.TH_TempFly) plugin;
+		org.bukkit.plugin.java.JavaPlugin javaPlugin = (org.bukkit.plugin.java.JavaPlugin) plugin;
+		org.bukkit.configuration.file.FileConfiguration cfg = plugin.getConfig();
+		
+		// Check if currently using MySQL
+		boolean isMysql = "MYSQL".equalsIgnoreCase(cfg.getString("storage.type", "SQLITE"));
+		if (!isMysql) {
+			sender.sendMessage(messageManager.getMessage("commands.tempfly.migrate.error.not-mysql"));
+			return true;
+		}
+		
+		// Check if SQLite file exists
+		String sqliteFile = cfg.getString("storage.sqlite.file", "data.db");
+		java.io.File dbFile = new java.io.File(plugin.getDataFolder(), sqliteFile);
+		if (!dbFile.exists()) {
+			sender.sendMessage(messageManager.getMessage("commands.tempfly.migrate.error.no-sqlite", "file", dbFile.getAbsolutePath()));
+			return true;
+		}
+		
+		sender.sendMessage(messageManager.getMessage("commands.tempfly.migrate.starting"));
+		
+		// Run migration asynchronously
+		new BukkitRunnable() {
+			@Override
+			public void run() {
+				try {
+					// Get MySQL datasource from plugin
+					HikariDataSource mysqlDataSource = tempFlyPlugin.getMySQLDataSource();
+					if (mysqlDataSource == null || mysqlDataSource.isClosed()) {
+						sender.sendMessage(messageManager.getMessage("commands.tempfly.migrate.error.no-datasource"));
+						return;
+					}
+					
+					DatabaseMigrator migrator = new DatabaseMigrator(javaPlugin);
+					DatabaseMigrator.MigrationResult result = migrator.migrateFromSQLiteToMySQL(mysqlDataSource);
+					
+					// Send results on main thread
+					new BukkitRunnable() {
+						@Override
+						public void run() {
+							if (result.hasError()) {
+								sender.sendMessage(messageManager.getMessage("commands.tempfly.migrate.error.general", "error", result.getError()));
+							} else {
+								Map<String, String> placeholders = new HashMap<>();
+								placeholders.put("total", String.valueOf(result.getTotalRecords()));
+								placeholders.put("migrated", String.valueOf(result.getMigrated()));
+								placeholders.put("skipped", String.valueOf(result.getSkipped()));
+								sender.sendMessage(messageManager.getMessage("commands.tempfly.migrate.success", placeholders));
+							}
+						}
+					}.runTask(plugin);
+					
+				} catch (Exception e) {
+					String errorMsg = e.getMessage();
+					new BukkitRunnable() {
+						@Override
+						public void run() {
+							sender.sendMessage(messageManager.getMessage("commands.tempfly.migrate.error.general", "error", errorMsg != null ? errorMsg : e.getClass().getSimpleName()));
+							plugin.getLogger().severe("Error during migration: " + e.getMessage());
+							e.printStackTrace();
+						}
+					}.runTask(plugin);
+				}
+			}
+		}.runTaskAsynchronously(plugin);
+		
+		return true;
+	}
+
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 		String cmd = command.getName().toLowerCase();
@@ -232,6 +323,7 @@ public class TempFlyCommand implements CommandExecutor, TabCompleter {
 			subcommands.add("remove");
 			subcommands.add("reload");
 			subcommands.add("version");
+			subcommands.add("migrate");
 			
 			String input = args[0].toLowerCase();
 			List<String> matches = new ArrayList<>();

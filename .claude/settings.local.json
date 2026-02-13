@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./apache-maven-3.9.9/bin/mvn:*)",
+      "Bash(dir /s \"G:\\pls\\TH_TempFly\")",
+      "Bash(find:*)",
+      "Bash(dir:*)",
+      "Bash(powershell:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

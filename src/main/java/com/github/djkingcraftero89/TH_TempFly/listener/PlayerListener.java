@@ -1,6 +1,7 @@
 package com.github.djkingcraftero89.TH_TempFly.listener;
 
 import com.github.djkingcraftero89.TH_TempFly.TH_TempFly;
+import com.github.djkingcraftero89.TH_TempFly.cache.LocationCache;
 import com.github.djkingcraftero89.TH_TempFly.fly.FlyManager;
 import com.github.djkingcraftero89.TH_TempFly.restriction.FlightRestrictionManager;
 import com.github.djkingcraftero89.TH_TempFly.util.MessageManager;
@@ -18,6 +19,7 @@ public class PlayerListener implements Listener {
 	private final FlyManager flyManager;
 	private final FlightRestrictionManager restrictionManager;
 	private final MessageManager messageManager;
+	private final LocationCache locationCache;
 	private final boolean enableOnJoin;
 	private final boolean disableOnQuit;
 	private final boolean notifyAdmins;
@@ -30,6 +32,10 @@ public class PlayerListener implements Listener {
 		this.enableOnJoin = enableOnJoin;
 		this.disableOnQuit = disableOnQuit;
 		this.notifyAdmins = notifyAdmins;
+
+		// Initialize LocationCache with configurable interval
+		int checkInterval = plugin.getConfig().getInt("fly.restrictions.check-interval-blocks", 10);
+		this.locationCache = new LocationCache(checkInterval);
 	}
 
 	@EventHandler
@@ -47,6 +53,9 @@ public class PlayerListener implements Listener {
 	public void onQuit(PlayerQuitEvent e) {
 		Player p = e.getPlayer();
 		flyManager.unloadPlayer(p, disableOnQuit);
+
+		// Clear location cache to prevent memory leaks
+		locationCache.clearCache(p.getUniqueId());
 	}
 
 	@EventHandler
@@ -54,24 +63,30 @@ public class PlayerListener implements Listener {
 		Player p = e.getPlayer();
 		Location from = e.getFrom();
 		Location to = e.getTo();
-		
+
 		// Check if player actually moved to a new block (ignore head movement)
 		if (to == null || (from.getBlockX() == to.getBlockX() && from.getBlockY() == to.getBlockY() && from.getBlockZ() == to.getBlockZ())) {
 			return;
 		}
-		
+
 		// Only check if player is flying
 		if (!p.isFlying()) {
 			return;
 		}
-		
+
+		// Use LocationCache to determine if we should perform expensive region checks
+		// This dramatically reduces the number of WorldGuard API calls
+		if (!locationCache.shouldCheck(p, to)) {
+			return; // Player hasn't moved far enough, skip check
+		}
+
 		// Check if flight is restricted at the new location
 		FlightRestrictionManager.RestrictionResult restriction = restrictionManager.checkFlightAllowed(p);
 		if (restriction.isBlocked()) {
 			// Disable flight
 			p.setFlying(false);
 			p.setAllowFlight(false);
-			
+
 			// Send appropriate message
 			if (restriction.getType() == FlightRestrictionManager.RestrictionType.WORLD) {
 				p.sendMessage(messageManager.getMessage("fly.restrictions.world-blocked", "world", restriction.getRestrictionName()));

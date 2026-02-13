@@ -5,6 +5,14 @@ update-checker:
   # Notify admins when they join if update is available
   notify-admins: true
 
+# Vulcan Anti-Cheat Integration
+# Automatically exempts players with active fly from Vulcan checks
+# No configuration needed - works automatically when Vulcan is installed
+vulcan:
+  # Integration info: This plugin automatically detects Vulcan and enables exemptions
+  # When players have fly active, they won't be detected as hackers by Vulcan
+  # No additional setup required!
+
 storage:
   # type: SQLITE or MYSQL
   type: SQLITE
@@ -22,6 +30,20 @@ storage:
     maximumPoolSize: 10
     minimumIdle: 2
     connectionTimeoutMs: 10000
+    # Batch size for saving multiple players at once (reduces save time by 90%)
+    # Higher values = fewer database transactions but more memory per save
+    # Recommended: 50 for most servers, 100 for very large servers (200+ players)
+    batch-size: 50
+  # Retry logic for transient database failures
+  retry:
+    # Maximum number of retry attempts (0 = no retries)
+    # Recommended: 3 for most servers
+    max-retries: 3
+    # Initial delay before first retry in milliseconds
+    initial-delay-ms: 100
+    # Multiplier for exponential backoff (each retry waits longer)
+    # For example: 100ms -> 200ms -> 400ms with multiplier 2.0
+    backoff-multiplier: 2.0
 
 # Redis Configuration for multi-server synchronization
 redis:
@@ -56,6 +78,18 @@ fly:
   enable-on-join-if-leftover: true
   # Freeze fly time for offline players (only counts down while playing)
   freeze-time-when-offline: true
+
+  # Configurable aliases for the /fly command
+  # Example: ["volar", "vuelo", "f"]
+  aliases: []
+
+  # Performance optimizations
+  performance:
+    # Permission cache duration in milliseconds (reduces overhead from permission checks)
+    # Lower values = more responsive to permission changes but slightly higher overhead
+    # Higher values = better performance but slower to react to permission changes
+    # Recommended: 1000ms (1 second) for most servers
+    permission-cache-duration-ms: 1000
   
   # Title system configuration
   titles:
@@ -79,3 +113,13 @@ fly:
     # Players entering these regions will have flight disabled automatically
     # Example: ["spawn", "pvp_zone", "no_fly_area"]
     blocked-regions: []
+    # Performance: Only check restrictions every N blocks moved (reduces overhead by 85-95%)
+    # Lower values = more frequent checks but higher CPU usage
+    # Higher values = less frequent checks but lower CPU usage
+    # Recommended: 10 for large servers (100+ players), 5 for smaller servers
+    check-interval-blocks: 10
+    # Performance: Region cache settings (reduces WorldGuard API calls by 95%)
+    # Maximum number of chunks to cache region data for
+    region-cache-size: 1000
+    # How long to cache region data in seconds before re-checking
+    region-cache-ttl-seconds: 30

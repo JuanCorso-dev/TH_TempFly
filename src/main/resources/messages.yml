@@ -37,21 +37,37 @@ commands:
       usage: "&cUso: /tempfly remove <jugador> <tiempo>"
       example: "&7Ejemplo: &e/tempfly remove NombreJugador 15m"
       success: "&aTiempo de vuelo reducido en &e{change}"
+    
+    migrate:
+      starting: "&7Iniciando migración de SQLite a MySQL..."
+      success: "&aMigración completada exitosamente! &7Total: &e{total} &7registros, &e{migrated} &7migrados, &e{skipped} &7omitidos"
+      error:
+        not-plugin: "&cError: No se pudo acceder al plugin"
+        not-mysql: "&cError: Debes estar usando MySQL para migrar datos. Cambia storage.type a MYSQL en config.yml"
+        no-sqlite: "&cError: No se encontró el archivo de base de datos SQLite: {file}"
+        no-datasource: "&cError: No se pudo obtener la conexión a MySQL"
+        general: "&cError durante la migración: {error}"
 
 # /fly command
 fly:
   no-permission: "&cNo tienes permiso para usar este comando."
   no-time: "&cNo tienes tiempo de vuelo restante."
   contact-admin: "&7Contacta a un administrador para obtener tiempo de vuelo."
-  disabled: "&cVuelo desactivado."
+  disabled: "&cVuelo desactivado. Tiempo restante: &e{time}"
   enabled: "&aVuelo activado. Tiempo restante: &e{time}"
   infinite-enabled: "&aVuelo infinito activado."
+  status:
+    flying: "&aTu vuelo está activado. Tiempo restante: &e{time}"
+    not-flying: "&cTu vuelo está desactivado. Tiempo restante: &e{time}"
+    infinite: "&aTienes vuelo infinito."
+  usage: "&eUso: /fly [toggle|on|off|check]"
   
   # Flight restrictions
   restrictions:
     world-blocked: "&cEl vuelo está desactivado en este mundo: &e{world}"
     region-blocked: "&cEl vuelo está desactivado en esta región: &e{region}"
     entering-blocked-zone: "&cHas entrado a una zona de no vuelo. El vuelo ha sido desactivado."
+    bypass-enabled: "&6&l[BYPASS] &eTienes permiso para volar en zonas bloqueadas."
 
 # Event messages
 events:

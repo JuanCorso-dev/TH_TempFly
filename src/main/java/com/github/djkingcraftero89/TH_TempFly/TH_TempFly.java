@@ -13,6 +13,7 @@ import com.github.djkingcraftero89.TH_TempFly.storage.SQLDataStore;
 import com.github.djkingcraftero89.TH_TempFly.util.MessageManager;
 import com.github.djkingcraftero89.TH_TempFly.util.UpdateChecker;
 import com.zaxxer.hikari.HikariDataSource;
+import io.papermc.paper.ServerBuildInfo;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -34,10 +35,32 @@ public class TH_TempFly extends JavaPlugin {
 	private FlightRestrictionManager restrictionManager;
 	private UpdateChecker updateChecker;
 
+	private static final int MIN_JAVA_VERSION = 21;
+	private static final int MIN_MC_MAJOR = 1;
+	private static final int MIN_MC_MINOR = 21;
+
 	@Override
 	public void onEnable() {
 		getLogger().info("Starting TH_TempFly plugin...");
 		getLogger().info("Dependencies are loaded automatically by Paper's library loader");
+
+		int javaVersion = Runtime.version().feature();
+		getLogger().info("Detected Java runtime: " + javaVersion);
+		if (javaVersion < MIN_JAVA_VERSION) {
+			getLogger().severe("TH_TempFly requires Java " + MIN_JAVA_VERSION + "+ but found Java " + javaVersion
+					+ ". Disabling plugin.");
+			getServer().getPluginManager().disablePlugin(this);
+			return;
+		}
+
+		String mcVersion = ServerBuildInfo.buildInfo().minecraftVersionId();
+		getLogger().info("Detected Minecraft version: " + mcVersion);
+		if (!isMinecraftVersionSupported(mcVersion)) {
+			getLogger().severe("TH_TempFly requires Minecraft " + MIN_MC_MAJOR + "." + MIN_MC_MINOR
+					+ "+ but found " + mcVersion + ". Disabling plugin.");
+			getServer().getPluginManager().disablePlugin(this);
+			return;
+		}
 
 		saveDefaultConfig();
 		FileConfiguration cfg = getConfig();
@@ -253,6 +276,18 @@ public class TH_TempFly extends JavaPlugin {
 			dataStore.close();
 		if (dataSource != null)
 			dataSource.close();
+	}
+
+	private boolean isMinecraftVersionSupported(String versionId) {
+		String[] parts = versionId.split("\\.");
+		try {
+			int major = Integer.parseInt(parts[0]);
+			int minor = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+			return major > MIN_MC_MAJOR || (major == MIN_MC_MAJOR && minor >= MIN_MC_MINOR);
+		} catch (NumberFormatException e) {
+			getLogger().warning("Could not parse Minecraft version '" + versionId + "', skipping version check.");
+			return true;
+		}
 	}
 
 	private HikariDataSource createDataSourceFromConfig(boolean mysql) {

@@ -3,12 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.djkingcraftero89</groupId>
   <artifactId>TH_TempFly</artifactId>
-  <version>1.2.3</version>
+  <version>1.2.4</version>
   <name>TH_TempFly</name>
   <description>Temporary fly plugin with SQL, Redis, and WorldGuard region restrictions for multi-server networks</description>
   <properties>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
+    <maven.compiler.release>21</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <paper.api.version>1.21.4-R0.1-SNAPSHOT</paper.api.version>
     <spigot.api.version>1.21.4-R0.1-SNAPSHOT</spigot.api.version>
@@ -139,8 +138,7 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.11.0</version>
         <configuration>
-          <source>${maven.compiler.source}</source>
-          <target>${maven.compiler.target}</target>
+          <release>${maven.compiler.release}</release>
         </configuration>
       </plugin>
       

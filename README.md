@@ -21,7 +21,7 @@ A comprehensive temporary flight plugin for Minecraft servers with SQL/Redis sup
 ## Requirements
 
 - **Minecraft**: 1.20+
-- **Java**: 17+
+- **Java**: 21+
 - **Server Software**: Paper, Spigot, or Bukkit
 - **Optional**: PlaceholderAPI for placeholders
 - **Optional**: WorldGuard for region-based flight restrictions

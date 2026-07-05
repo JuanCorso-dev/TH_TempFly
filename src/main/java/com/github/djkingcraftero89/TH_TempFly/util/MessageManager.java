@@ -68,7 +68,9 @@ public class MessageManager {
             "check.remaining", "check.no-time", "give.usage", "give.example", "give.success",
             "add.usage", "add.example", "add.success", "remove.usage", "remove.example", "remove.success",
             "migrate.starting", "migrate.success", "migrate.error.not-plugin", "migrate.error.not-mysql",
-            "migrate.error.no-sqlite", "migrate.error.no-datasource", "migrate.error.general"
+            "migrate.error.no-sqlite", "migrate.error.no-datasource", "migrate.error.general",
+            "version", "debug.usage", "debug.invalid-subcommand", "debug.status", "debug.enabled",
+            "debug.disabled", "debug.invalid-value"
         };
         
         for (String key : tempflyKeys) {

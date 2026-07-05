@@ -5,8 +5,8 @@ import org.bukkit.plugin.Plugin;
 import java.lang.reflect.Method;
 
 /**
- * Integración con Vulcan Anti-Cheat para evitar detecciones de fly legales
- * Usa reflexión para evitar dependencias en tiempo de compilación
+ * Vulcan Anti-Cheat integration to prevent false-positive fly detections
+ * Uses reflection to avoid compile-time dependencies
  */
 public class VulcanIntegration {
     private final Plugin plugin;
@@ -14,108 +14,108 @@ public class VulcanIntegration {
     private Method addExemptionMethod;
     private Method removeExemptionMethod;
     private final boolean enabled;
-    
+
     public VulcanIntegration(Plugin plugin) {
         this.plugin = plugin;
         this.enabled = initializeVulcan();
     }
-    
+
     /**
-     * Inicializa la API de Vulcan usando reflexión
-     * @return true si se inicializó correctamente
+     * Initializes the Vulcan API using reflection
+     * @return true if it was initialized successfully
      */
     private boolean initializeVulcan() {
         try {
             if (!plugin.getServer().getPluginManager().isPluginEnabled("Vulcan")) {
-                plugin.getLogger().info("Vulcan Anti-Cheat no encontrado, integración deshabilitada.");
+                plugin.getLogger().info("Vulcan Anti-Cheat not found, integration disabled.");
                 return false;
             }
-            
-            // Obtener la clase VulcanAPI usando reflexión
+
+            // Get the VulcanAPI class using reflection
             Class<?> vulcanAPIClass = Class.forName("me.frep.vulcan.api.VulcanAPI");
             Class<?> factoryClass = Class.forName("me.frep.vulcan.api.VulcanAPI$Factory");
-            
-            // Obtener la instancia de API
+
+            // Get the API instance
             Method getApiMethod = factoryClass.getDeclaredMethod("getApi");
             this.vulcanAPI = getApiMethod.invoke(null);
-            
-            // Obtener los métodos que necesitamos
+
+            // Get the methods we need
             this.addExemptionMethod = vulcanAPIClass.getDeclaredMethod("addExemption", Player.class, String.class);
             this.removeExemptionMethod = vulcanAPIClass.getDeclaredMethod("removeExemption", Player.class, String.class);
-            
-            plugin.getLogger().info("Integración con Vulcan Anti-Cheat activada correctamente!");
+
+            plugin.getLogger().info("Vulcan Anti-Cheat integration enabled successfully!");
             return true;
         } catch (ClassNotFoundException e) {
-            plugin.getLogger().info("Vulcan Anti-Cheat no encontrado, integración deshabilitada.");
+            plugin.getLogger().info("Vulcan Anti-Cheat not found, integration disabled.");
             return false;
         } catch (Exception e) {
-            plugin.getLogger().warning("Error al inicializar Vulcan API: " + e.getMessage());
+            plugin.getLogger().warning("Error initializing Vulcan API: " + e.getMessage());
             if (plugin.getConfig().getBoolean("debug", false)) {
                 e.printStackTrace();
             }
             return false;
         }
     }
-    
+
     /**
-     * Habilita las excepciones de fly para un jugador
-     * Esto evita que Vulcan detecte el fly como hack
-     * @param player El jugador a exentar
+     * Enables fly exemptions for a player
+     * This prevents Vulcan from detecting fly as a hack
+     * @param player The player to exempt
      */
     public void enableFlyExemption(Player player) {
         if (!enabled || vulcanAPI == null || addExemptionMethod == null) {
             return;
         }
-        
+
         try {
-            // Exempt los checks relacionados con vuelo
-            // Flight - detección principal de vuelo
-            // Elytra - puede detectar vuelo con elytras
-            // Speed - puede detectar velocidad de vuelo
-            // Motion - puede detectar movimientos anormales en el aire
+            // Exempt flight-related checks
+            // Flight - primary flight detection
+            // Elytra - may detect flight via elytra
+            // Speed - may detect flight speed
+            // Motion - may detect abnormal air movement
             addExemptionMethod.invoke(vulcanAPI, player, "Flight");
             addExemptionMethod.invoke(vulcanAPI, player, "Elytra");
             addExemptionMethod.invoke(vulcanAPI, player, "Speed");
             addExemptionMethod.invoke(vulcanAPI, player, "Motion");
-            
-            plugin.getLogger().info("Excepciones de fly habilitadas en Vulcan para " + player.getName());
+
+            plugin.getLogger().info("Fly exemptions enabled in Vulcan for " + player.getName());
         } catch (Exception e) {
-            plugin.getLogger().warning("Error al establecer excepciones de Vulcan para " + player.getName() + ": " + e.getMessage());
+            plugin.getLogger().warning("Error setting Vulcan exemptions for " + player.getName() + ": " + e.getMessage());
             if (plugin.getConfig().getBoolean("debug", false)) {
                 e.printStackTrace();
             }
         }
     }
-    
+
     /**
-     * Deshabilita las excepciones de fly para un jugador
-     * Vulcan volverá a detectar hacks normalmente
-     * @param player El jugador a remover de excepciones
+     * Disables fly exemptions for a player
+     * Vulcan will resume detecting hacks normally
+     * @param player The player to remove exemptions from
      */
     public void disableFlyExemption(Player player) {
         if (!enabled || vulcanAPI == null || removeExemptionMethod == null) {
             return;
         }
-        
+
         try {
-            // Remover las excepciones de checks de vuelo
+            // Remove the flight check exemptions
             removeExemptionMethod.invoke(vulcanAPI, player, "Flight");
             removeExemptionMethod.invoke(vulcanAPI, player, "Elytra");
             removeExemptionMethod.invoke(vulcanAPI, player, "Speed");
             removeExemptionMethod.invoke(vulcanAPI, player, "Motion");
-            
-            plugin.getLogger().info("Excepciones de fly deshabilitadas en Vulcan para " + player.getName());
+
+            plugin.getLogger().info("Fly exemptions disabled in Vulcan for " + player.getName());
         } catch (Exception e) {
-            plugin.getLogger().warning("Error al remover excepciones de Vulcan para " + player.getName() + ": " + e.getMessage());
+            plugin.getLogger().warning("Error removing Vulcan exemptions for " + player.getName() + ": " + e.getMessage());
             if (plugin.getConfig().getBoolean("debug", false)) {
                 e.printStackTrace();
             }
         }
     }
-    
+
     /**
-     * Verifica si la integración con Vulcan está activa
-     * @return true si Vulcan está disponible y la integración funciona
+     * Checks whether the Vulcan integration is active
+     * @return true if Vulcan is available and the integration is working
      */
     public boolean isEnabled() {
         return enabled;

@@ -43,7 +43,7 @@ public class TempFlyCommand implements CommandExecutor, TabCompleter {
 		// Admin command: /atempfly -> only "debug"
 		if ("atempfly".equals(cmd)) {
 			if (args.length == 0) {
-				sender.sendMessage("Usage: /atempfly debug <true|false>");
+				sender.sendMessage(messageManager.getMessage("commands.tempfly.debug.usage"));
 				return true;
 			}
 			String sub = args[0].toLowerCase();
@@ -54,7 +54,7 @@ public class TempFlyCommand implements CommandExecutor, TabCompleter {
 				}
 				return handleDebug(sender, args);
 			}
-			sender.sendMessage("Invalid subcommand. Use: /atempfly debug <true|false>");
+			sender.sendMessage(messageManager.getMessage("commands.tempfly.debug.invalid-subcommand"));
 			return true;
 		}
 
@@ -105,7 +105,7 @@ public class TempFlyCommand implements CommandExecutor, TabCompleter {
 					if (tempFlyPlugin.getUpdateChecker() != null) {
 						sender.sendMessage(tempFlyPlugin.getUpdateChecker().getVersionInfo());
 					} else {
-						sender.sendMessage("§eTH_TempFly §7v" + plugin.getDescription().getVersion());
+						sender.sendMessage(messageManager.getMessage("commands.tempfly.version", "version", plugin.getDescription().getVersion()));
 					}
 				}
 				return true;
@@ -193,20 +193,20 @@ public class TempFlyCommand implements CommandExecutor, TabCompleter {
 	private boolean handleDebug(CommandSender sender, String[] args) {
 		if (args.length < 2) {
 			String status = debugMode ? "enabled" : "disabled";
-			sender.sendMessage("Debug mode is currently " + status + ".");
-			sender.sendMessage("Usage: /atempfly debug <true|false>");
+			sender.sendMessage(messageManager.getMessage("commands.tempfly.debug.status", "status", status));
+			sender.sendMessage(messageManager.getMessage("commands.tempfly.debug.usage"));
 			return true;
 		}
-		
+
 		String value = args[1].toLowerCase();
 		if ("true".equals(value) || "on".equals(value) || "1".equals(value)) {
 			debugMode = true;
-			sender.sendMessage("Debug mode enabled. Detailed logs will be shown in console.");
+			sender.sendMessage(messageManager.getMessage("commands.tempfly.debug.enabled"));
 		} else if ("false".equals(value) || "off".equals(value) || "0".equals(value)) {
 			debugMode = false;
-			sender.sendMessage("Debug mode disabled.");
+			sender.sendMessage(messageManager.getMessage("commands.tempfly.debug.disabled"));
 		} else {
-			sender.sendMessage("Invalid value. Use: true, false, on, off, 1, or 0");
+			sender.sendMessage(messageManager.getMessage("commands.tempfly.debug.invalid-value"));
 			return true;
 		}
 		return true;

@@ -197,7 +197,7 @@ public class FlyManager {
 						p.setAllowFlight(true);
 						p.setFlying(true);
 						
-						// Habilitar excepciones de Vulcan cuando se activa el fly
+						// Enable Vulcan exemptions when fly is activated
 						if (vulcanIntegration != null) {
 							vulcanIntegration.enableFlyExemption(p);
 						}
@@ -269,8 +269,8 @@ public class FlyManager {
 				boolean shouldFly = valueToStore != 0L;
 				p.setAllowFlight(shouldFly);
 				p.setFlying(shouldFly);
-				
-				// Actualizar excepciones de Vulcan según el estado del fly
+
+				// Update Vulcan exemptions based on fly state
 				if (vulcanIntegration != null) {
 					if (shouldFly) {
 						vulcanIntegration.enableFlyExemption(p);
@@ -280,7 +280,7 @@ public class FlyManager {
 				}
 			}
 		}
-		
+
 		syncToRedis(playerId, valueToStore);
 	}
 
@@ -301,7 +301,7 @@ public class FlyManager {
 				p.setAllowFlight(shouldFly);
 				p.setFlying(shouldFly);
 				
-				// Actualizar excepciones de Vulcan según el estado del fly
+				// Update Vulcan exemptions based on fly state
 				if (vulcanIntegration != null) {
 					if (shouldFly) {
 						vulcanIntegration.enableFlyExemption(p);
@@ -380,7 +380,7 @@ public class FlyManager {
 		player.setAllowFlight(false);
 		player.setFlying(false);
 		
-		// Deshabilitar excepciones de Vulcan cuando se desactiva el fly
+		// Disable Vulcan exemptions when fly is deactivated
 		if (vulcanIntegration != null) {
 			vulcanIntegration.disableFlyExemption(player);
 		}

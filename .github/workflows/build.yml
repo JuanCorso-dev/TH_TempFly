@@ -1,0 +1,192 @@
+name: Build & Release
+
+on:
+  push:
+    branches: ["**"]
+    tags: [ 'v*' ]
+    paths-ignore:
+      - '*.md'
+      - '.gitignore'
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - '*.md'
+      - '.gitignore'
+
+# Un build por rama. Si empujás dos veces seguidas, el anterior se cancela
+# en vez de encolarse y competir por la CPU del runner.
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Los tags son necesarios para calcular el changelog.
+          fetch-depth: 0
+
+      # El plugin apunta a Java 21 (maven.compiler.release) para seguir corriendo
+      # en servidores 1.21.x. Un build de Java 21 funciona sin cambios en Java 25,
+      # que es lo que exige Minecraft desde la 26.1.
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      # Versión leída del pom, sin sufijo de build: el artefacto publicado se
+      # llama igual que el que produce `mvn package` en local.
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(mvn -q -DforceStdout help:evaluate -Dexpression=project.version)
+          if [ -z "$VERSION" ]; then
+            echo "::error::No se pudo leer la versión desde pom.xml"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Versión: $VERSION"
+
+      # Sin perfil release: ese perfil incrementa la versión del pom, y acá la
+      # versión la fija el repositorio, no el runner.
+      - name: Build
+        run: mvn -B clean package
+
+      - name: Generate changelog
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        id: changelog
+        shell: bash
+        run: |
+          # Tag más cercano en la historia de HEAD = el release anterior. Se usa
+          # describe (topológico) y no un sort por versión, que se rompe si el
+          # esquema de versión cambió.
+          # Agrupamos por tipo de conventional commit y descartamos el ruido.
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            RANGE=""; RANGE_DESC="el inicio"
+          else
+            RANGE="$PREV_TAG..HEAD"; RANGE_DESC="$PREV_TAG"
+          fi
+
+          # hash <TAB> subject <TAB> autor <TAB> correo, sin merges (ruido de integración).
+          # El correo lleva el usuario de GitHub, que es lo que enlaza a un perfil; el nombre
+          # del autor no tiene por qué coincidir con él.
+          COMMITS=$(git log $RANGE --no-merges --pretty=format:'%h%x09%s%x09%an%x09%ae')
+          REPO_URL="${{ github.server_url }}/${{ github.repository }}"
+
+          feat=""; fix=""; perf=""; brk=""; other=""
+          while IFS=$'\t' read -r hash subject author email; do
+            [ -z "$subject" ] && continue
+            # type(scope)!: descripción  — scope y '!' opcionales. El tipo admite
+            # dígitos porque este repo usa prefijos como 'i18n:', que si no quedarían
+            # sin parsear y repetidos dentro de la descripción.
+            if [[ "$subject" =~ ^([a-zA-Z][a-zA-Z0-9]*)(\([^\)]*\))?(!)?:[[:space:]]*(.*)$ ]]; then
+              type="${BASH_REMATCH[1]}"; bang="${BASH_REMATCH[3]}"; desc="${BASH_REMATCH[4]}"
+            else
+              type="_"; bang=""; desc="$subject"
+            fi
+            # El hash enlaza a su commit; el autor, a su perfil. Un correo noreply de GitHub
+            # tiene la forma id+usuario@users.noreply.github.com, de donde sale el usuario real.
+            if [[ "$email" =~ ^([0-9]+\+)?([^@]+)@users\.noreply\.github\.com$ ]]; then
+              handle="${BASH_REMATCH[2]}"
+            else
+              handle=""
+            fi
+            line="- ${desc} ([\`${hash}\`](${REPO_URL}/commit/${hash}))"
+            if [ -n "$handle" ]; then
+              line+=" por [@${handle}](${{ github.server_url }}/${handle})"
+            elif [ -n "$author" ]; then
+              line+=" por ${author}"
+            fi
+            # Un commit marcado breaking ('!') va SOLO a Breaking, no se duplica.
+            if [ -n "$bang" ]; then brk+="${line}"$'\n'; continue; fi
+            case "$type" in
+              feat) feat+="${line}"$'\n' ;;
+              fix)  fix+="${line}"$'\n' ;;
+              perf) perf+="${line}"$'\n' ;;
+              chore|ci) : ;;   # ruido: no entra al release
+              *)    other+="${line}"$'\n' ;;
+            esac
+          done <<< "$COMMITS"
+
+          CL=""
+          [ -n "$brk" ]   && CL+=$'### ⚠️ Breaking Changes\n'"$brk"$'\n'
+          [ -n "$feat" ]  && CL+=$'### ✨ Features\n'"$feat"$'\n'
+          [ -n "$fix" ]   && CL+=$'### 🐛 Fixes\n'"$fix"$'\n'
+          [ -n "$perf" ]  && CL+=$'### ⚡ Performance\n'"$perf"$'\n'
+          [ -n "$other" ] && CL+=$'<details><summary>Otros cambios</summary>\n\n'"$other"$'</details>\n'
+          [ -z "$CL" ]    && CL="- Sin cambios relevantes desde ${RANGE_DESC}"
+
+          # Pie con el diff completo contra la release anterior, que el changelog resume.
+          TAG="v${{ steps.version.outputs.version }}"
+          if [ -n "$PREV_TAG" ]; then
+            CL+=$'\n---\n\n'"**Todos los cambios**: [\`${PREV_TAG}...${TAG}\`](${REPO_URL}/compare/${PREV_TAG}...${TAG})"$'\n'
+          fi
+
+          {
+            echo "CHANGELOG<<GH_CHANGELOG_EOF"
+            printf '%s\n' "$CL"
+            echo "GH_CHANGELOG_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      # Falla temprano y con un mensaje claro si Maven no produjo el jar,
+      # en vez de publicar una Release sin adjuntos. El shade plugin deja
+      # también original-*.jar, que no se publica.
+      - name: Verify artifact
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          V="${{ steps.version.outputs.version }}"
+          JAR="target/TH_TempFly-${V}.jar"
+          if [ ! -f "$JAR" ]; then
+            echo "::error::Falta el artefacto esperado: $JAR"
+            echo "Contenido de target:"; ls -la target/*.jar || true
+            exit 1
+          fi
+
+      # La versión del pom es la identidad del release, así que reusar un tag
+      # existente significaría publicar dos artefactos distintos bajo el mismo
+      # nombre. Se corta acá con un mensaje que dice qué hacer.
+      - name: Check tag is free
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "::error::El tag $TAG ya existe. Subí la versión en pom.xml antes de publicar."
+            exit 1
+          fi
+
+      - name: Create Release
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: "TH_TempFly v${{ steps.version.outputs.version }}"
+          body: |
+            ## Changelog
+            ${{ steps.changelog.outputs.CHANGELOG }}
+
+            ## Artefacto
+
+            | Archivo | Dónde va |
+            |---|---|
+            | `TH_TempFly-${{ steps.version.outputs.version }}.jar` | `plugins/` del servidor Paper |
+
+            ## Requisitos
+
+            - Minecraft 1.21+ o 26.1+
+            - Java 21+ en 1.21.x, Java 25+ en 26.x (lo exige Minecraft)
+            - Paper (o un fork de Paper como Purpur)
+          files: target/TH_TempFly-${{ steps.version.outputs.version }}.jar
+          generate_release_notes: false
+          make_latest: true
+
+      # Las ramas no suben el jar: consume el storage de Actions de la cuenta y para probar de
+      # verdad ya está la Release que publica main. Lo que importa de un build de rama es que
+      # compile, y eso ya quedó reflejado en el estado del run.

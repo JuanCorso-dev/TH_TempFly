@@ -36,8 +36,15 @@ public class TH_TempFly extends JavaPlugin {
 	private UpdateChecker updateChecker;
 
 	private static final int MIN_JAVA_VERSION = 21;
-	private static final int MIN_MC_MAJOR = 1;
-	private static final int MIN_MC_MINOR = 21;
+
+	// Minecraft uses two version schemes. The legacy "1.x" scheme (1.21.4) and the
+	// year-based scheme introduced in 2026 (26.1, 26.2, 26.3), where the first number
+	// is the year and the second is the drop within that year. They are separate
+	// numbering systems, so a version from one is never compared against the other.
+	private static final int LEGACY_MC_MAJOR = 1;
+	private static final int MIN_LEGACY_MC_MINOR = 21;
+	private static final int MIN_YEAR_SCHEME_MAJOR = 26;
+	private static final String MIN_SUPPORTED_VERSION_LABEL = "1.21+ (legacy) or 26.1+ (year-based)";
 
 	@Override
 	public void onEnable() {
@@ -56,8 +63,8 @@ public class TH_TempFly extends JavaPlugin {
 		String mcVersion = ServerBuildInfo.buildInfo().minecraftVersionId();
 		getLogger().info("Detected Minecraft version: " + mcVersion);
 		if (!isMinecraftVersionSupported(mcVersion)) {
-			getLogger().severe("TH_TempFly requires Minecraft " + MIN_MC_MAJOR + "." + MIN_MC_MINOR
-					+ "+ but found " + mcVersion + ". Disabling plugin.");
+			getLogger().severe("TH_TempFly requires Minecraft " + MIN_SUPPORTED_VERSION_LABEL
+					+ " but found " + mcVersion + ". Disabling plugin.");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
 		}
@@ -283,7 +290,15 @@ public class TH_TempFly extends JavaPlugin {
 		try {
 			int major = Integer.parseInt(parts[0]);
 			int minor = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
-			return major > MIN_MC_MAJOR || (major == MIN_MC_MAJOR && minor >= MIN_MC_MINOR);
+
+			// Legacy scheme: 1.21, 1.21.4. Only the minor number carries the release.
+			if (major == LEGACY_MC_MAJOR) {
+				return minor >= MIN_LEGACY_MC_MINOR;
+			}
+
+			// Year-based scheme: 26.1, 26.3, and every later year. The drop number
+			// restarts each year, so a newer year is always supported regardless of it.
+			return major >= MIN_YEAR_SCHEME_MAJOR;
 		} catch (NumberFormatException e) {
 			getLogger().warning("Could not parse Minecraft version '" + versionId + "', skipping version check.");
 			return true;

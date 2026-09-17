@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/badge/version-1.2.4-blue)](https://github.com/JuanCorso-dev/TH_TempFly/releases)
 [![Minecraft](https://img.shields.io/badge/minecraft-1.21%20%E2%80%93%2026.x-brightgreen)](https://papermc.io/downloads/paper)
-[![Java](https://img.shields.io/badge/java-21%2B-orange)](https://adoptium.net/)
+[![Java](https://img.shields.io/badge/java-21%2B%20%7C%2025%2B%20on%2026.x-orange)](https://adoptium.net/)
 [![Paper API](https://img.shields.io/badge/paper--api-1.21.4-0288d1)](https://papermc.io/)
 [![License](https://img.shields.io/github/license/JuanCorso-dev/TH_TempFly?color=lightgrey)](LICENSE)
 [![bStats](https://img.shields.io/badge/bStats-27511-ff6600)](https://bstats.org/plugin/bukkit/TH_TempFly/27511)
@@ -31,13 +31,18 @@ numbering and the year-based `26.x` drops introduced in 2026.
 ## Requirements
 
 - **Minecraft**: 1.21+ or 26.1+ (both schemes supported by the same JAR)
-- **Java**: 21+
+- **Java**: 21+ on 1.21.x, 25+ on 26.x (required by Minecraft itself)
 - **Server Software**: Paper (or a Paper fork such as Purpur)
 - **Optional**: PlaceholderAPI for placeholders
 - **Optional**: WorldGuard for region-based flight restrictions
 
 The plugin checks the Java and Minecraft versions on startup and disables
 itself with an explanatory log message when they are not met.
+
+> **Moving to 26.x?** Minecraft requires Java 25 from 26.1 onwards, so the
+> server will not start on Java 21 no matter which plugins are installed.
+> That requirement comes from Minecraft, not from this plugin, which asks
+> only for Java 21 and runs fine on newer runtimes.
 
 > **Note on server software:** Paper is required, not merely recommended. The
 > plugin uses the Paper-only `ServerBuildInfo` API, so it will not run on
@@ -47,11 +52,14 @@ itself with an explanatory log message when they are not met.
 
 Minecraft moved to year-based versioning in 2026, so both schemes are in use:
 
-| Scheme | Versions | Supported |
-|--------|----------|-----------|
-| Legacy | 1.21, 1.21.4, 1.21.11 | Yes |
-| Year-based | 26.1, 26.2, 26.3 and later | Yes |
-| Legacy | 1.20.x and older | No |
+| Scheme | Versions | Java required by the server | Supported |
+|--------|----------|-----------------------------|-----------|
+| Legacy | 1.21, 1.21.4, 1.21.11 | 21+ | Yes |
+| Year-based | 26.1, 26.2, 26.3 and later | 25+ | Yes |
+| Legacy | 1.20.x and older | — | No |
+
+The 2026 drops are 26.1 (Tiny Takeover), 26.2 (Chaos Cubed) and 26.3
+(Wilderness Bound).
 
 `plugin.yml` declares `api-version: 1.21` on purpose. That field is a minimum
 floor rather than a target: a server older than the declared version refuses
@@ -222,6 +230,9 @@ Find the compiled JAR in `target/TH_TempFly-[version].jar`
 - Restored the `cache` package, which an unanchored `.gitignore` rule had been
   excluding from the repository, breaking the build on a fresh clone
 - Documented the performance tuning keys in this README
+- Documented that Minecraft requires Java 25 from 26.1 onwards. The plugin
+  still targets Java 21 so that 1.21.x servers keep working; a Java 21 build
+  runs unchanged on newer runtimes.
 
 ### v1.2.0 (WorldGuard Integration & Update Checker)
 - Added WorldGuard integration for region-based restrictions

@@ -1,11 +1,12 @@
 # TH_TempFly
 
-[![Version](https://img.shields.io/badge/version-1.2.4-blue)](https://github.com/JuanCorso-dev/TH_TempFly/releases)
+[![Version](https://img.shields.io/github/v/release/JuanCorso-dev/TH_TempFly?label=version&color=blue)](https://github.com/JuanCorso-dev/TH_TempFly/releases/latest)
 [![Minecraft](https://img.shields.io/badge/minecraft-1.21%20%E2%80%93%2026.x-brightgreen)](https://papermc.io/downloads/paper)
 [![Java](https://img.shields.io/badge/java-21%2B%20%7C%2025%2B%20on%2026.x-orange)](https://adoptium.net/)
 [![Paper API](https://img.shields.io/badge/paper--api-1.21.4-0288d1)](https://papermc.io/)
 [![License](https://img.shields.io/github/license/JuanCorso-dev/TH_TempFly?color=lightgrey)](LICENSE)
 [![bStats](https://img.shields.io/badge/bStats-27511-ff6600)](https://bstats.org/plugin/bukkit/TH_TempFly/27511)
+[![Build](https://github.com/JuanCorso-dev/TH_TempFly/actions/workflows/build.yml/badge.svg)](https://github.com/JuanCorso-dev/TH_TempFly/actions/workflows/build.yml)
 
 A comprehensive temporary flight plugin for Minecraft servers with SQL/Redis support, PlaceholderAPI integration, WorldGuard region restrictions, and customizable messages.
 

@@ -35,7 +35,10 @@ Thumbs.db
 plugins/
 data/
 logs/
-cache/
+# Anchored to the repository root: an unanchored "cache/" also matches the
+# Java source package src/main/java/.../TH_TempFly/cache/ and silently
+# excludes it from commits.
+/cache/
 
 # Maven wrapper
 .mvn/wrapper/maven-wrapper.jar

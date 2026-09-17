@@ -1,6 +1,16 @@
 # TH_TempFly
 
+[![Version](https://img.shields.io/badge/version-1.2.4-blue)](https://github.com/JuanCorso-dev/TH_TempFly/releases)
+[![Minecraft](https://img.shields.io/badge/minecraft-1.21%20%E2%80%93%2026.x-brightgreen)](https://papermc.io/downloads/paper)
+[![Java](https://img.shields.io/badge/java-21%2B-orange)](https://adoptium.net/)
+[![Paper API](https://img.shields.io/badge/paper--api-1.21.4-0288d1)](https://papermc.io/)
+[![License](https://img.shields.io/github/license/JuanCorso-dev/TH_TempFly?color=lightgrey)](LICENSE)
+[![bStats](https://img.shields.io/badge/bStats-27511-ff6600)](https://bstats.org/plugin/bukkit/TH_TempFly/27511)
+
 A comprehensive temporary flight plugin for Minecraft servers with SQL/Redis support, PlaceholderAPI integration, WorldGuard region restrictions, and customizable messages.
+
+A single build supports both Minecraft version schemes: the legacy `1.21.x`
+numbering and the year-based `26.x` drops introduced in 2026.
 
 ## Features
 
@@ -20,15 +30,37 @@ A comprehensive temporary flight plugin for Minecraft servers with SQL/Redis sup
 
 ## Requirements
 
-- **Minecraft**: 1.20+
+- **Minecraft**: 1.21+ or 26.1+ (both schemes supported by the same JAR)
 - **Java**: 21+
-- **Server Software**: Paper, Spigot, or Bukkit
+- **Server Software**: Paper (or a Paper fork such as Purpur)
 - **Optional**: PlaceholderAPI for placeholders
 - **Optional**: WorldGuard for region-based flight restrictions
 
+The plugin checks the Java and Minecraft versions on startup and disables
+itself with an explanatory log message when they are not met.
+
+> **Note on server software:** Paper is required, not merely recommended. The
+> plugin uses the Paper-only `ServerBuildInfo` API, so it will not run on
+> plain Spigot or CraftBukkit.
+
+### Minecraft version support
+
+Minecraft moved to year-based versioning in 2026, so both schemes are in use:
+
+| Scheme | Versions | Supported |
+|--------|----------|-----------|
+| Legacy | 1.21, 1.21.4, 1.21.11 | Yes |
+| Year-based | 26.1, 26.2, 26.3 and later | Yes |
+| Legacy | 1.20.x and older | No |
+
+`plugin.yml` declares `api-version: 1.21` on purpose. That field is a minimum
+floor rather than a target: a server older than the declared version refuses
+to load the plugin, so keeping it at `1.21` is what preserves compatibility
+with 1.21.x while 26.x servers accept it without issue.
+
 ## Installation
 
-1. Download the latest `TH_TempFly-1.2.0.jar` from releases
+1. Download the latest `TH_TempFly-1.2.4.jar` from releases
 2. Place it in your server's `plugins` folder
 3. (Optional) Install WorldGuard if you want region-based restrictions
 4. Restart your server
@@ -43,9 +75,16 @@ A comprehensive temporary flight plugin for Minecraft servers with SQL/Redis sup
 - `/tempfly check <player>` - Check player's remaining flight time
 - `/tempfly reload` - Reload plugin configuration
 - `/tempfly version` - Check current version and available updates
+- `/tempfly migrate` - Migrate flight data from another plugin
+- `/atempfly debug <true|false>` - Toggle debug logging
+
+Alias: `/tfly` can be used instead of `/tempfly`.
 
 ### Player Commands
 - `/fly` - Toggle flight mode (if you have time/permission)
+- `/fly on` - Enable flight
+- `/fly off` - Disable flight
+- `/fly check` - Check your remaining flight time
 
 ### Time Formats
 - `30s` - 30 seconds
@@ -137,6 +176,27 @@ fly:
 - This permission is useful for staff members who need to access restricted areas
 - Default: Only operators have this permission
 
+### Performance Tuning
+
+Region and permission lookups are cached, which matters on servers with many
+concurrent players. The defaults suit most setups:
+
+```yaml
+fly:
+  performance:
+    # How long a permission lookup stays cached, in milliseconds.
+    # Lower reacts faster to permission changes; higher costs less.
+    permission-cache-duration-ms: 1000
+  restrictions:
+    # Run the expensive region check only after the player moves this many
+    # blocks. 10 suits large servers, 5 suits smaller ones.
+    check-interval-blocks: 10
+    # Number of chunks to keep region data cached for.
+    region-cache-size: 1000
+    # How long cached region data stays valid, in seconds.
+    region-cache-ttl-seconds: 30
+```
+
 ## Building
 
 ### Development Build (No version change)
@@ -153,6 +213,15 @@ This will automatically increment the version (e.g., 1.2.0 → 1.2.1) and build 
 Find the compiled JAR in `target/TH_TempFly-[version].jar`
 
 ## Changelog
+
+### v1.2.4 (Minecraft 26.x support)
+- Support for the year-based Minecraft version scheme (26.1, 26.2, 26.3 and later)
+- The same JAR still runs on 1.21.x; no separate build is required
+- Fixed the startup version check, which compared both version schemes on a
+  single numeric line and accepted meaningless versions such as `2.0`
+- Restored the `cache` package, which an unanchored `.gitignore` rule had been
+  excluding from the repository, breaking the build on a fresh clone
+- Documented the performance tuning keys in this README
 
 ### v1.2.0 (WorldGuard Integration & Update Checker)
 - Added WorldGuard integration for region-based restrictions

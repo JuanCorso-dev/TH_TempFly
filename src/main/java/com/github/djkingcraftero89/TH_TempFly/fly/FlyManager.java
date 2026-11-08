@@ -27,7 +27,8 @@ public class FlyManager {
 	private final int tickIntervalTicks;
 	private final long saveIntervalSeconds;
 	private final boolean freezeTimeWhenOffline;
-	
+	private final TimeConsumptionMode consumptionMode;
+
 	// Title system variables
 	private final boolean titlesEnabled;
 	private final long warningThreshold;
@@ -39,7 +40,7 @@ public class FlyManager {
 	private int taskId = -1;
 	private long lastSaveEpochSecond = 0L;
 
-	public FlyManager(Plugin plugin, DataStore dataStore, MessageManager messageManager, RedisService redisService, VulcanIntegration vulcanIntegration, int tickIntervalTicks, long saveIntervalSeconds, boolean freezeTimeWhenOffline, boolean titlesEnabled, long warningThreshold, int titleUpdateInterval) {
+	public FlyManager(Plugin plugin, DataStore dataStore, MessageManager messageManager, RedisService redisService, VulcanIntegration vulcanIntegration, int tickIntervalTicks, long saveIntervalSeconds, boolean freezeTimeWhenOffline, TimeConsumptionMode consumptionMode, boolean titlesEnabled, long warningThreshold, int titleUpdateInterval) {
 		this.plugin = plugin;
 		this.dataStore = dataStore;
 		this.messageManager = messageManager;
@@ -48,6 +49,7 @@ public class FlyManager {
 		this.tickIntervalTicks = tickIntervalTicks;
 		this.saveIntervalSeconds = saveIntervalSeconds;
 		this.freezeTimeWhenOffline = freezeTimeWhenOffline;
+		this.consumptionMode = consumptionMode;
 		this.titlesEnabled = titlesEnabled;
 		this.warningThreshold = warningThreshold;
 		this.titleUpdateInterval = titleUpdateInterval;
@@ -99,7 +101,7 @@ public class FlyManager {
 
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			// Early exits: check cheap conditions first
-			if (!p.isFlying()) {
+			if (!isConsumingTime(p)) {
 				continue;
 			}
 
@@ -111,10 +113,13 @@ public class FlyManager {
 			UUID id = p.getUniqueId();
 			long remaining = playerToRemainingSeconds.getOrDefault(id, 0L);
 
-			// No time and no infinite permission: disable flight (e.g. permission was removed)
+			// No time and no infinite permission: disable flight if still flying (e.g. permission was removed).
+			// Players on the ground are left alone so ONLINE mode does not repeat the expiry message every tick.
 			if (remaining <= 0) {
-				disableFlight(p);
-				playerToRemainingSeconds.put(id, 0L);
+				if (p.isFlying()) {
+					disableFlight(p);
+					playerToRemainingSeconds.put(id, 0L);
+				}
 				continue;
 			}
 
@@ -152,8 +157,8 @@ public class FlyManager {
 				continue;
 			}
 
-			// Early exit if player not flying
-			if (!p.isFlying()) {
+			// Early exit if the consumption mode does not count this player's time right now
+			if (!isConsumingTime(p)) {
 				continue;
 			}
 
@@ -173,6 +178,15 @@ public class FlyManager {
 
 			playerToRemainingSeconds.put(id, remaining);
 		}
+	}
+
+	/**
+	 * Whether the player's remaining time counts down on this tick under the configured consumption mode.
+	 * @param p The online player to check
+	 * @return true in ONLINE mode, or in FLYING mode while the player is in the air
+	 */
+	private boolean isConsumingTime(Player p) {
+		return consumptionMode == TimeConsumptionMode.ONLINE || p.isFlying();
 	}
 
 	public void loadPlayer(Player p, boolean enableOnJoin) {

@@ -3,6 +3,7 @@ package com.github.djkingcraftero89.TH_TempFly;
 import com.github.djkingcraftero89.TH_TempFly.command.FlyCommand;
 import com.github.djkingcraftero89.TH_TempFly.command.TempFlyCommand;
 import com.github.djkingcraftero89.TH_TempFly.fly.FlyManager;
+import com.github.djkingcraftero89.TH_TempFly.fly.TimeConsumptionMode;
 import com.github.djkingcraftero89.TH_TempFly.integration.VulcanIntegration;
 import com.github.djkingcraftero89.TH_TempFly.listener.PlayerListener;
 import com.github.djkingcraftero89.TH_TempFly.placeholder.TempFlyPlaceholder;
@@ -112,8 +113,15 @@ public class TH_TempFly extends JavaPlugin {
 		boolean titlesEnabled = cfg.getBoolean("fly.titles.enabled", true);
 		long warningThreshold = cfg.getLong("fly.titles.warning-threshold", 5L);
 		int titleUpdateInterval = cfg.getInt("fly.titles.update-interval", 20);
+		String rawConsumptionMode = cfg.getString("fly.time-consumption-mode", "FLYING");
+		TimeConsumptionMode consumptionMode = TimeConsumptionMode.parse(rawConsumptionMode).orElseGet(() -> {
+			getLogger().warning("Unknown fly.time-consumption-mode '" + rawConsumptionMode
+					+ "', falling back to FLYING (valid values: FLYING, ONLINE)");
+			return TimeConsumptionMode.FLYING;
+		});
 
 		getLogger().info("Freeze time when offline: " + freezeTimeWhenOffline);
+		getLogger().info("Time consumption mode: " + consumptionMode);
 		getLogger().info("Title system enabled: " + titlesEnabled + " (threshold: " + warningThreshold + "s)");
 
 		// Initialize flight restrictions
@@ -195,7 +203,7 @@ public class TH_TempFly extends JavaPlugin {
 
 		// Initialize FlyManager
 		this.flyManager = new FlyManager(this, dataStore, messageManager, redisService, vulcanIntegration, tickInterval,
-				saveInterval, freezeTimeWhenOffline, titlesEnabled, warningThreshold, titleUpdateInterval);
+				saveInterval, freezeTimeWhenOffline, consumptionMode, titlesEnabled, warningThreshold, titleUpdateInterval);
 		this.flyManager.start();
 
 		// Register commands

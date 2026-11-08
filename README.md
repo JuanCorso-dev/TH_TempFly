@@ -27,6 +27,7 @@ numbering and the year-based `26.x` drops introduced in 2026.
 - **bStats Integration**: Anonymous usage statistics to help improve the plugin
 - **Title Warnings**: Visual countdown warnings when fly time is running out
 - **Time Freeze Mode**: Option to freeze time when players are offline
+- **Time Consumption Mode**: Count flight time down only while flying, or the whole time a player is online
 - **Flight Restrictions**: Automatically disable flight when entering blocked zones
 
 ## Requirements
@@ -169,6 +170,19 @@ fly:
     world-blocked: "&cFlight is disabled in this world: &e{world}"
     region-blocked: "&cFlight is disabled in this region: &e{region}"
 ```
+
+### Time Consumption Mode
+
+Choose when a player's remaining flight time counts down:
+
+```yaml
+fly:
+  # FLYING - only while the player is in the air (default)
+  # ONLINE - the whole time the player is online, even with /fly turned off
+  time-consumption-mode: FLYING
+```
+
+Changing this setting requires a server restart; `/tempfly reload` does not apply it.
 
 ### Flight Restrictions Configuration
 

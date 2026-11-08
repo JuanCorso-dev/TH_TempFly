@@ -78,6 +78,11 @@ fly:
   enable-on-join-if-leftover: true
   # Freeze fly time for offline players (only counts down while playing)
   freeze-time-when-offline: true
+  # When remaining fly time counts down:
+  #   FLYING - only while the player is in the air (default)
+  #   ONLINE - the whole time the player is online, even with /fly turned off
+  # Changing this requires a server restart (/tempfly reload does not apply it)
+  time-consumption-mode: FLYING
 
   # Configurable aliases for the /fly command
   # Example: ["volar", "vuelo", "f"]

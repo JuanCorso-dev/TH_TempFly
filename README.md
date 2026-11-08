@@ -70,7 +70,7 @@ with 1.21.x while 26.x servers accept it without issue.
 
 ## Installation
 
-1. Download the latest `TH_TempFly-1.2.4.jar` from releases
+1. Download the latest `TH_TempFly-1.3.0.jar` from releases
 2. Place it in your server's `plugins` folder
 3. (Optional) Install WorldGuard if you want region-based restrictions
 4. Restart your server
@@ -252,6 +252,15 @@ This will automatically increment the version (e.g., 1.2.0 → 1.2.1) and build 
 Find the compiled JAR in `target/TH_TempFly-[version].jar`
 
 ## Changelog
+
+### v1.3.0 (Time Consumption Mode & Config Updates)
+- New `fly.time-consumption-mode` option: count flight time down only while
+  flying (`FLYING`, the default and previous behavior) or the whole time a
+  player is online (`ONLINE`)
+- `config.yml` and `messages.yml` now carry a `config-version` key and are
+  updated automatically on startup: new keys are added, existing values are
+  kept and a `.bak` backup is written first
+- Added the first unit tests
 
 ### v1.2.4 (Minecraft 26.x support)
 - Support for the year-based Minecraft version scheme (26.1, 26.2, 26.3 and later)

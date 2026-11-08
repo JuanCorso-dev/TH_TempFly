@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.djkingcraftero89</groupId>
   <artifactId>TH_TempFly</artifactId>
-  <version>1.2.4</version>
+  <version>1.3.0</version>
   <name>TH_TempFly</name>
   <description>Temporary fly plugin with SQL, Redis, and WorldGuard region restrictions for multi-server networks</description>
   <properties>

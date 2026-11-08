@@ -1,3 +1,6 @@
+# Internal file version used for automatic updates. Do not change it.
+config-version: 1
+
 # Update checker configuration
 update-checker:
   # Check for new versions on plugin startup
@@ -8,10 +11,9 @@ update-checker:
 # Vulcan Anti-Cheat Integration
 # Automatically exempts players with active fly from Vulcan checks
 # No configuration needed - works automatically when Vulcan is installed
-vulcan:
-  # Integration info: This plugin automatically detects Vulcan and enables exemptions
-  # When players have fly active, they won't be detected as hackers by Vulcan
-  # No additional setup required!
+# Integration info: This plugin automatically detects Vulcan and enables exemptions
+# When players have fly active, they won't be detected as hackers by Vulcan
+# No additional setup required!
 
 storage:
   # type: SQLITE or MYSQL

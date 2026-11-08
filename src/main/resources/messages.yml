@@ -1,6 +1,9 @@
 # TH_TempFly Plugin Messages
 # Customize all messages using Minecraft color codes with ampersand notation
 
+# Internal file version used for automatic updates. Do not change it.
+config-version: 1
+
 # Command messages
 commands:
   no-permission: "&cYou don't have permission to use this command."

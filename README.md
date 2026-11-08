@@ -127,6 +127,22 @@ Alias: `/tfly` can be used instead of `/tempfly`.
 
 ## Configuration
 
+### Configuration Updates
+
+`config.yml` and `messages.yml` start with a `config-version` key. On startup the
+plugin compares both files with the versions bundled in the jar and updates an
+outdated file automatically:
+
+- New keys are added with their default values and comments.
+- Your existing values are kept, including keys the plugin does not know about.
+- The original file is first copied to a backup next to it, such as
+  `config.yml.v0-20261107-162600.bak`.
+- Comments you added to keys that ship with the plugin are replaced by the
+  default comments; the backup still has yours.
+
+Do not edit `config-version`. A file with a newer version than the plugin ships,
+or one that is not valid YAML, is left untouched and a warning is logged.
+
 ### Database Configuration
 ```yaml
 storage:

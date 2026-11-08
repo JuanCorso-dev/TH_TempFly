@@ -2,6 +2,7 @@ package com.github.djkingcraftero89.TH_TempFly;
 
 import com.github.djkingcraftero89.TH_TempFly.command.FlyCommand;
 import com.github.djkingcraftero89.TH_TempFly.command.TempFlyCommand;
+import com.github.djkingcraftero89.TH_TempFly.config.ConfigUpdater;
 import com.github.djkingcraftero89.TH_TempFly.fly.FlyManager;
 import com.github.djkingcraftero89.TH_TempFly.fly.TimeConsumptionMode;
 import com.github.djkingcraftero89.TH_TempFly.integration.VulcanIntegration;
@@ -71,6 +72,9 @@ public class TH_TempFly extends JavaPlugin {
 		}
 
 		saveDefaultConfig();
+		if (new ConfigUpdater(this, "config.yml").update()) {
+			reloadConfig();
+		}
 		FileConfiguration cfg = getConfig();
 		getLogger().info("Configuration loaded successfully");
 

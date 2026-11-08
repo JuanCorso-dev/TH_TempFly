@@ -1,5 +1,6 @@
 package com.github.djkingcraftero89.TH_TempFly.util;
 
+import com.github.djkingcraftero89.TH_TempFly.config.ConfigUpdater;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -28,7 +29,9 @@ public class MessageManager {
         if (!messagesFile.exists()) {
             plugin.saveResource("messages.yml", false);
         }
-        
+
+        new ConfigUpdater(plugin, "messages.yml").update();
+
         messagesConfig = YamlConfiguration.loadConfiguration(messagesFile);
         
         // Load default messages from resource
